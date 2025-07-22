@@ -5,8 +5,8 @@
 
 const SUPABASE_CONFIG = {
   debug: true, // Enable debug mode for development
-  url: (typeof process !== 'undefined' && process.env && process.env.SUPABASE_URL) || 'https://itauvwgtmctneefilcff.supabase.co',
-  anonKey: (typeof process !== 'undefined' && process.env && process.env.SUPABASE_ANON_KEY) || 'sb_publishable_yIVWfTAF5YQG-HmG2KBqqQ_G1apVgje',
+  url: (typeof process !== 'undefined' && process.env && process.env.SUPABASE_URL) || '',
+  anonKey: (typeof process !== 'undefined' && process.env && process.env.SUPABASE_ANON_KEY) || '',
   auth: {
     // Set to false to disable auto refresh
     autoRefreshToken: true,
