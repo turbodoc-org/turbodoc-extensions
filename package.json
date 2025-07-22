@@ -11,8 +11,8 @@
     "dev": "node build/build-extension.js dev",
     "clean": "node build/build-extension.js clean",
     "info": "node build/build-extension.js info",
-    "lint": "eslint shared/**/*.js build/**/*.js",
-    "lint:fix": "eslint shared/**/*.js build/**/*.js --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test": "jest",
     "test:watch": "jest --watch"
   },

@@ -117,7 +117,7 @@ class ExtensionBuilder {
   /**
    * Process Chrome-specific modifications
    */
-  async processChromeSpecific(distDir) {
+  processChromeSpecific(_distDir) {
     // No specific modifications needed for Chrome at this time
     // Future modifications can be added here
   }
@@ -125,7 +125,7 @@ class ExtensionBuilder {
   /**
    * Process Firefox-specific modifications
    */
-  async processFirefoxSpecific(distDir) {
+  processFirefoxSpecific(distDir) {
     // Modify background script for Firefox compatibility
     const backgroundScript = path.join(distDir, 'background', 'background.js');
     
@@ -164,7 +164,7 @@ class ExtensionBuilder {
   /**
    * Create zip packages for store submission
    */
-  async package() {
+  package() {
     console.log('📦 Creating distribution packages...');
     
     for (const [platform, config] of Object.entries(this.platforms)) {

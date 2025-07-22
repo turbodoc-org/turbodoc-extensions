@@ -57,8 +57,8 @@ class TurbodocBackground {
    */
   setupEventListeners() {
     // Handle messages from popup/content scripts
-    browserCompat.runtime.onMessage.addListener(async (message, sender) => {
-      return await this.handleMessage(message, sender);
+    browserCompat.runtime.onMessage.addListener((message, _sender) => {
+      return this.handleMessage(message, _sender);
     });
 
     // Handle context menu clicks
@@ -132,7 +132,7 @@ class TurbodocBackground {
   /**
    * Handle messages from other parts of the extension
    */
-  async handleMessage(message, sender) {
+  async handleMessage(message, _sender) {
     switch (message.type) {
     case 'GET_AUTH_STATUS':
       return {
@@ -149,9 +149,10 @@ class TurbodocBackground {
       await this.processOfflineQueue();
       return { success: true };
 
-    case 'GET_CURRENT_TAB':
+    case 'GET_CURRENT_TAB': {
       const tabs = await browserCompat.tabs.query({ active: true, currentWindow: true });
       return { tab: tabs[0] || null };
+    }
 
     case 'PROCESS_OFFLINE_QUEUE':
       await this.processOfflineQueue();
@@ -357,7 +358,7 @@ class TurbodocBackground {
   /**
    * Show notification to user
    */
-  async showNotification(title, message, type = 'basic') {
+  showNotification(title, message, type = 'basic') {
     try {
       // Check if notifications are supported
       if (typeof chrome !== 'undefined' && chrome.notifications) {
@@ -376,30 +377,10 @@ class TurbodocBackground {
     }
   }
 
-  /**
-   * Get extension stats
-   */
-  async getStats() {
-    try {
-      const storageStats = await this.storage.getStorageStats();
-      const lastSync = await this.storage.getLastSync();
-      
-      return {
-        isAuthenticated: this.api.isAuthenticated(),
-        user: this.api.getCurrentUser(),
-        storageStats: storageStats.data,
-        lastSync: lastSync.data,
-        version: chrome.runtime.getManifest().version
-      };
-    } catch (error) {
-      console.error('Failed to get stats:', error);
-      return null;
-    }
-  }
 }
 
 // Initialize background service
-const turbodocBackground = new TurbodocBackground();
+new TurbodocBackground();
 
 // Export for testing (if in test environment)
 if (typeof module !== 'undefined' && module.exports) {

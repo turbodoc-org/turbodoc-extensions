@@ -271,12 +271,12 @@ class TurbodocPopup {
   /**
    * Load user tags for autocomplete
    */
-  async loadUserTags() {
+  loadUserTags() {
     try {
       // TODO: Add this when the endpoint exists
       // const result = await this.api.getUserTags();
       // if (result.success) {
-        // this.availableTags = result.data || [];
+      // this.availableTags = result.data || [];
       // }
       this.availableTags = [];
     } catch (error) {
@@ -309,7 +309,7 @@ class TurbodocPopup {
   /**
    * Show tags suggestions
    */
-  showTagsSuggestions(suggestions = [], currentTag = '') {
+  showTagsSuggestions(suggestions = [], _currentTag = '') {
     const container = document.getElementById('tagsSuggestions');
     
     if (!suggestions || suggestions.length === 0) {

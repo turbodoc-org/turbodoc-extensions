@@ -1,0 +1,5 @@
+node_modules/
+dist/
+shared/lib/supabase-bundle.js
+*.min.js
+temp-*

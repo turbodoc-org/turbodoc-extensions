@@ -16,6 +16,7 @@ module.exports = {
     // Browser extension globals
     chrome: 'readonly',
     browser: 'readonly',
+    importScripts: 'readonly',
     
     // Extension-specific globals
     browserCompat: 'readonly',
@@ -23,7 +24,18 @@ module.exports = {
     StorageManager: 'readonly',
     TurbodocPopup: 'readonly',
     TurbodocBackground: 'readonly',
-    TurbodocContent: 'readonly'
+    TurbodocContent: 'readonly',
+    
+    // Supabase globals (from bundle)
+    createClient: 'readonly',
+    supabase: 'readonly',
+    
+    // Configuration globals
+    SUPABASE_CONFIG: 'readonly',
+    validateSupabaseConfig: 'readonly',
+    getApiUrl: 'readonly',
+    validateApiConfig: 'readonly',
+    SupabaseExtensionStorage: 'readonly'
   },
   rules: {
     // Code style
@@ -50,7 +62,6 @@ module.exports = {
     // Error prevention
     'no-undef': 'error',
     'no-unreachable': 'error',
-    'no-duplicate-keys': 'error',
     'no-empty': 'error'
   },
   overrides: [
@@ -65,6 +76,9 @@ module.exports = {
       globals: {
         chrome: 'off',
         browser: 'off'
+      },
+      rules: {
+        'no-console': 'off'
       }
     },
     {

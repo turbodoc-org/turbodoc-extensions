@@ -59,9 +59,9 @@ class TurbodocContent {
   /**
    * Handle messages from popup/background
    */
-  async handleMessage(message, sender, sendResponse) {
+  handleMessage(message, sender, sendResponse) {
     switch (message.type) {
-    case 'GET_PAGE_METADATA':
+    case 'GET_PAGE_METADATA': {
       const response = {
         metadata: this.pageMetadata,
         selectedText: this.selectedText,
@@ -73,8 +73,9 @@ class TurbodocContent {
         sendResponse(response);
       }
       return response;
+    }
 
-    case 'GET_SELECTED_TEXT':
+    case 'GET_SELECTED_TEXT': {
       const textResponse = {
         selectedText: this.selectedText,
         hasSelection: this.selectedText.length > 0
@@ -84,8 +85,9 @@ class TurbodocContent {
         sendResponse(textResponse);
       }
       return textResponse;
+    }
 
-    case 'EXTRACT_MAIN_CONTENT':
+    case 'EXTRACT_MAIN_CONTENT': {
       const content = this.extractMainContent();
       const contentResponse = {
         content: content,
@@ -96,6 +98,7 @@ class TurbodocContent {
         sendResponse(contentResponse);
       }
       return contentResponse;
+    }
 
     case 'HIGHLIGHT_SAVED':
       this.showSaveConfirmation();
@@ -456,19 +459,6 @@ class TurbodocContent {
     }, 2000);
   }
 
-  /**
-   * Get reading time estimate
-   */
-  getReadingTimeEstimate() {
-    const text = this.extractMainContent();
-    const words = text.split(/\s+/).length;
-    const readingTime = Math.ceil(words / 200); // Average reading speed: 200 words/minute
-    return {
-      words,
-      minutes: readingTime,
-      text: readingTime === 1 ? '1 min read' : `${readingTime} min read`
-    };
-  }
 }
 
 // Initialize content script when DOM is ready

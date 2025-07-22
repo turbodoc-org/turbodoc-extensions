@@ -7,10 +7,6 @@ class StorageManager {
   constructor(browserCompat) {
     this.storage = browserCompat.storage;
     this.STORAGE_KEYS = {
-      // Legacy keys (kept for migration)
-      AUTH_TOKEN: 'turbodoc_auth_token',
-      USER_DATA: 'turbodoc_user_data',
-      // Current keys
       SUPABASE_SESSION: 'turbodoc-extension-auth', // Matches Supabase storage key
       PREFERENCES: 'turbodoc_preferences',
       OFFLINE_QUEUE: 'turbodoc_offline_queue',

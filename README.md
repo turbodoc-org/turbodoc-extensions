@@ -9,6 +9,7 @@ The Turbodoc Browser Extension provides seamless bookmarking functionality that 
 ## Features
 
 ### Core Features
+
 - **One-click bookmarking** - Save any webpage instantly
 - **Cross-browser compatibility** - Works on Chrome, Firefox, and Edge
 - **Seamless authentication** - Sign in once, stay signed in
@@ -16,12 +17,14 @@ The Turbodoc Browser Extension provides seamless bookmarking functionality that 
 - **Offline support** - Save bookmarks even when offline, sync when connection is restored
 
 ### User Interface
+
 - **Popup interface** - Clean, intuitive bookmark creation form
 - **Context menu integration** - Right-click to save pages and links
 - **Visual feedback** - Success notifications and loading states
 - **Tag suggestions** - Autocomplete based on existing tags
 
 ### Technical Features
+
 - **Unified codebase** - Single codebase for multiple browsers
 - **Background sync** - Automatic syncing of offline bookmarks
 - **Secure storage** - Authentication tokens stored securely
@@ -29,8 +32,8 @@ The Turbodoc Browser Extension provides seamless bookmarking functionality that 
 
 ## Architecture
 
-```
-turbodoc-extension/
+```txt
+turbodoc-extensions/
 ├── shared/                     # Common code for all browsers
 │   ├── popup/                  # Popup interface (HTML, CSS, JS)
 │   ├── content/                # Content script for page interaction
@@ -49,7 +52,7 @@ turbodoc-extension/
 
 ### Prerequisites
 
-- Node.js 14+ 
+- Node.js 22+
 - npm or yarn
 - Chrome/Firefox browsers for testing
 
@@ -57,10 +60,13 @@ turbodoc-extension/
 
 1. Clone the repository
 2. Navigate to the extension directory:
+
    ```bash
-   cd turbodoc-extension
+   cd turbodoc-extensions
    ```
+
 3. Install dependencies:
+
    ```bash
    npm install
    ```
@@ -68,22 +74,26 @@ turbodoc-extension/
 ### Building
 
 Build all platforms:
+
 ```bash
 npm run build
 ```
 
 Build specific platform:
+
 ```bash
 npm run build:chrome
 npm run build:firefox
 ```
 
 Development mode with file watching:
+
 ```bash
 npm run dev
 ```
 
 Create distribution packages:
+
 ```bash
 npm run package
 ```
@@ -93,12 +103,14 @@ npm run package
 Load the extension for testing:
 
 **Chrome:**
+
 1. Open `chrome://extensions/`
 2. Enable "Developer mode"
 3. Click "Load unpacked"
 4. Select `dist/chrome` directory
 
 **Firefox:**
+
 1. Open `about:debugging`
 2. Click "This Firefox"
 3. Click "Load Temporary Add-on"
@@ -118,12 +130,14 @@ Load the extension for testing:
 ## Browser Compatibility
 
 ### Chrome/Edge (Manifest V3)
+
 - Uses service worker for background functionality
 - Promise-based APIs
 - Separate host permissions
 - `chrome.*` API namespace
 
 ### Firefox (Manifest V2)
+
 - Persistent background script
 - Native promise support
 - Combined permissions array
@@ -138,13 +152,15 @@ The extension uses **Supabase** for authentication and can integrate with either
 1. **Supabase directly** - For simple setups using Supabase database
 2. **Custom API backend** - For advanced features with custom business logic
 
-### Supabase Authentication Features:
+### Supabase Authentication Features
+
 - **User signup/login** - Email/password authentication
 - **Password reset** - Email-based password recovery  
 - **Session management** - Automatic token refresh and persistence
 - **Secure storage** - Sessions stored securely in browser extension storage
 
-### API Integration:
+### API Integration
+
 - **Bookmarks** - CRUD operations on bookmark data
 - **User data** - Tags, statistics, and preferences  
 - **Sync** - Cross-device bookmark synchronization
@@ -162,18 +178,21 @@ See `SUPABASE_SETUP.md` for detailed setup instructions.
 ## Store Submission
 
 ### Chrome Web Store
+
 1. Build and package: `npm run build && npm run package`
 2. Upload `dist/turbodoc-extension-chrome.zip`
 3. Complete store listing with screenshots and description
 4. Submit for review
 
 ### Firefox Add-ons (AMO)
+
 1. Build and package: `npm run build && npm run package`
 2. Upload `dist/turbodoc-extension-firefox.zip`
 3. Choose distribution method (public or unlisted)
 4. Submit for review
 
 ### Microsoft Edge Add-ons
+
 - Uses same package as Chrome
 - Separate store submission process
 - Similar requirements to Chrome Web Store
@@ -192,9 +211,8 @@ MIT License - see LICENSE file for details
 ## Support
 
 For support and feedback:
-- GitHub Issues: [Repository Issues](https://github.com/turbodoc/turbodoc-extension/issues)
-- Email: support@turbodoc.com
-- Documentation: [Turbodoc Docs](https://docs.turbodoc.com)
+
+- GitHub Issues: [Repository Issues](https://github.com/turbodoc/turbodoc-extensions/issues)
 
 ---
 
@@ -204,7 +222,7 @@ For support and feedback:
 
 To use the extension:
 
-1. **Install dependencies**: `cd turbodoc-extension && npm install`
+1. **Install dependencies**: `cd turbodoc-extensions && npm install`
 2. **Configure Supabase**: Follow the `SUPABASE_SETUP.md` guide to set up authentication
 3. **Update configuration**: Edit `shared/lib/supabase-config.js` with your Supabase credentials
 4. **Build extension**: `npm run build`

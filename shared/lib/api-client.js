@@ -169,74 +169,7 @@ class TurbodocAPI {
     }
   }
 
-  /**
-   * Sign up new user
-   */
-  async signUp(email, password, metadata = {}) {
-    try {
-      await this.init();
 
-      if (!this.supabase) {
-        throw new Error('Supabase client not initialized');
-      }
-
-      const { data, error } = await this.supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: metadata
-        }
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      return {
-        success: true,
-        data: {
-          session: data.session,
-          user: data.user
-        }
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: this.getErrorMessage(error.message)
-      };
-    }
-  }
-
-  /**
-   * Refresh authentication session
-   */
-  async refreshSession() {
-    try {
-      await this.init();
-
-      if (!this.supabase) {
-        throw new Error('Supabase client not initialized');
-      }
-
-      const { data, error } = await this.supabase.auth.refreshSession();
-
-      if (error) {
-        throw error;
-      }
-
-      this.setSession(data.session);
-      
-      return {
-        success: true,
-        data: data.session
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: this.getErrorMessage(error.message)
-      };
-    }
-  }
 
   /**
    * Logout user
@@ -262,31 +195,6 @@ class TurbodocAPI {
     }
   }
 
-  /**
-   * Reset password
-   */
-  async resetPassword(email) {
-    try {
-      await this.init();
-
-      if (!this.supabase) {
-        throw new Error('Supabase client not initialized');
-      }
-
-      const { error } = await this.supabase.auth.resetPasswordForEmail(email);
-
-      if (error) {
-        throw error;
-      }
-
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: this.getErrorMessage(error.message)
-      };
-    }
-  }
 
   /**
    * Create new bookmark
@@ -325,64 +233,8 @@ class TurbodocAPI {
     }
   }
 
-  /**
-   * Get recent bookmarks
-   */
-  async getRecentBookmarks(limit = 10) {
-    try {
-      const response = await this.request(`/bookmarks?limit=${limit}`);
-      
-      return {
-        success: true,
-        data: response
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: this.getErrorMessage(error.message)
-      };
-    }
-  }
 
-  /**
-   * Update bookmark
-   */
-  async updateBookmark(id, updates) {
-    try {
-      const response = await this.request(`/bookmarks/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(updates)
-      });
 
-      return {
-        success: true,
-        data: response
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: this.getErrorMessage(error.message)
-      };
-    }
-  }
-
-  /**
-   * Delete bookmark
-   */
-  async deleteBookmark(id) {
-    try {
-      await this.request(`/bookmarks/${id}`, {
-        method: 'DELETE'
-      });
-
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: this.getErrorMessage(error.message)
-      };
-    }
-  }
 
   /**
    * Get user tags for autocomplete
@@ -404,24 +256,6 @@ class TurbodocAPI {
     }
   }
 
-  /**
-   * Get user stats for badge
-   */
-  async getUserStats() {
-    try {
-      const response = await this.request('/user/stats');
-      
-      return {
-        success: true,
-        data: response
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: this.getErrorMessage(error.message)
-      };
-    }
-  }
 
   /**
    * Convert error codes to user-friendly messages
@@ -473,6 +307,8 @@ class SupabaseExtensionStorage {
   async init() {
     if (!this.storageManager && typeof StorageManager !== 'undefined') {
       this.storageManager = new StorageManager(browserCompat);
+      // Wait for storage manager to be ready
+      await Promise.resolve();
     }
   }
 

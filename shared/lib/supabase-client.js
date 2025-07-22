@@ -12,7 +12,7 @@ class SupabaseLoader {
   /**
    * Load Supabase library from bundle
    */
-  async loadSupabase() {
+  loadSupabase() {
     if (this.loaded && this.supabaseLib) {
       return this.supabaseLib;
     }
