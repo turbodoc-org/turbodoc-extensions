@@ -26,8 +26,8 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
   
   if (isDevelopment) {
     // Development configuration
-    SUPABASE_CONFIG.url = 'https://itauvwgtmctneefilcff.supabase.co';
-    SUPABASE_CONFIG.anonKey = 'sb_publishable_yIVWfTAF5YQG-HmG2KBqqQ_G1apVgje';
+    SUPABASE_CONFIG.url = '';
+    SUPABASE_CONFIG.anonKey = '';
   }
 }
 
