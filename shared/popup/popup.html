@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Turbodoc</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="popup-header">
+      <div class="logo">
+        <img src="../icons/icon-48.png" alt="Turbodoc" class="logo-icon">
+        <h1 class="logo-text">Turbodoc</h1>
+      </div>
+      <div class="user-status" id="userStatus"></div>
+    </header>
+
+    <!-- Loading State -->
+    <div class="state-container" id="loadingState">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Loading...</p>
+    </div>
+
+    <!-- Login State -->
+    <div class="state-container hidden" id="loginState">
+      <form class="login-form" id="loginForm">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            required 
+            autocomplete="username"
+            placeholder="Enter your email"
+          >
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            required 
+            autocomplete="current-password"
+            placeholder="Enter your password"
+          >
+        </div>
+        <button type="submit" class="btn btn-primary" id="loginButton">
+          <span class="btn-text">Sign In</span>
+          <div class="btn-spinner hidden"></div>
+        </button>
+        <div class="auth-links">
+          <button type="button" class="btn btn-link" id="forgotPasswordLinkButton">
+            Forgot password?
+          </button>
+          <button class="link-button hidden" id="signUpLinkButton">
+            Don't have an account? Sign up
+          </button>
+        </div>
+      </form>
+    </div>
+
+
+    <!-- Bookmark State -->
+    <div class="state-container hidden" id="bookmarkState">
+      <form class="bookmark-form" id="bookmarkForm">
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input 
+            type="text" 
+            id="title" 
+            name="title" 
+            required 
+            placeholder="Page title"
+          >
+        </div>
+        
+        <div class="form-group">
+          <label for="url">URL</label>
+          <input 
+            type="url" 
+            id="url" 
+            name="url" 
+            readonly 
+            class="url-field"
+          >
+        </div>
+        
+        <div class="form-group">
+          <label for="tags">Tags <span class="optional">(optional)</span></label>
+          <input 
+            type="text" 
+            id="tags" 
+            name="tags" 
+            placeholder="Enter tags, separated by commas"
+          >
+          <div class="tags-suggestions" id="tagsSuggestions"></div>
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="saveButton">
+            <span class="btn-text">Save Bookmark</span>
+            <div class="btn-spinner hidden"></div>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Success State -->
+    <div class="state-container hidden" id="successState">
+      <div class="success-content">
+        <div class="success-icon">✓</div>
+        <h2 class="success-title">Bookmark Saved!</h2>
+        <p class="success-message">Your bookmark has been saved to Turbodoc.</p>
+        <div class="success-actions">
+          <button class="btn btn-secondary" id="saveAnotherButton">
+            Save Another
+          </button>
+          <button class="btn btn-link" id="viewBookmarksButton">
+            View All Bookmarks
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div class="state-container hidden" id="errorState">
+      <div class="error-content">
+        <div class="error-icon">⚠</div>
+        <h2 class="error-title">Error</h2>
+        <p class="error-message" id="errorMessage">Something went wrong. Please try again.</p>
+        <div class="error-actions">
+          <button class="btn btn-primary" id="retryButton">
+            Try Again
+          </button>
+          <button class="btn btn-secondary" id="backButton">
+            Back
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="popup-footer" id="popupFooter">
+      <div class="footer-links">
+        <button class="link-button" id="openWebAppButton">
+          Open Web App
+        </button>
+        <button class="link-button" id="signOutButton">
+          Sign Out
+        </button>
+      </div>
+    </footer>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../lib/browser-compat.js"></script>
+  <script src="../lib/supabase-bundle.js"></script>
+  <script src="../lib/supabase-config.js"></script>
+  <script src="../lib/api-config.js"></script>
+  <script src="../lib/supabase-client.js"></script>
+  <script src="../lib/storage.js"></script>
+  <script src="../lib/api-client.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
