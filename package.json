@@ -1,6 +1,6 @@
 {
   "name": "turbodoc-browser-extension",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Turbodoc Browser Extension - One-click bookmarking for the modern web",
   "private": true,
   "scripts": {
