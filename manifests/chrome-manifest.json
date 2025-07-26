@@ -33,9 +33,8 @@
     "contextMenus"
   ],
   "host_permissions": [
-    "https://api.turbodoc.com/*",
-    "https://*.turbodoc.com/*",
-    "https://*.supabase.co/*"
+    "https://api.turbodoc.ai/*",
+    "https://itauvwgtmctneefilcff.supabase.co/*"
   ],
   "web_accessible_resources": [
     {
