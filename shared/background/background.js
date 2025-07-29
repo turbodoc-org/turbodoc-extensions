@@ -30,17 +30,25 @@ class TurbodocBackground {
     if (this.isInitialized) {return;}
     
     try {
-      // Set up event listeners
+      // Set up event listeners first (always required)
       this.setupEventListeners();
       
-      // Initialize authentication
-      await this.initializeAuth();
-      
-      // Set up context menus
+      // Set up context menus immediately (critical for Chrome store)
       await this.setupContextMenus();
       
-      // Process offline queue
-      await this.processOfflineQueue();
+      // Initialize authentication (can fail gracefully)
+      try {
+        await this.initializeAuth();
+      } catch (authError) {
+        console.warn('Auth initialization failed, continuing without auth:', authError);
+      }
+      
+      // Process offline queue (can fail gracefully)
+      try {
+        await this.processOfflineQueue();
+      } catch (queueError) {
+        console.warn('Offline queue processing failed:', queueError);
+      }
       
       // Set up periodic sync
       this.setupPeriodicSync();
@@ -49,6 +57,13 @@ class TurbodocBackground {
       console.log('Turbodoc background service initialized');
     } catch (error) {
       console.error('Failed to initialize background service:', error);
+      // Even if init fails, try to set up context menus as fallback
+      try {
+        await this.setupContextMenus();
+        console.log('Context menus set up as fallback');
+      } catch (fallbackError) {
+        console.error('Fallback context menu setup failed:', fallbackError);
+      }
     }
   }
 
@@ -75,8 +90,8 @@ class TurbodocBackground {
 
     // Handle extension install/update
     if (chrome.runtime.onInstalled) {
-      chrome.runtime.onInstalled.addListener((details) => {
-        this.handleInstallUpdate(details);
+      chrome.runtime.onInstalled.addListener(async (details) => {
+        await this.handleInstallUpdate(details);
       });
     }
   }
@@ -105,27 +120,64 @@ class TurbodocBackground {
    */
   async setupContextMenus() {
     try {
-      // Remove existing context menus
-      await browserCompat.contextMenus.removeAll();
+      // Check if contextMenus API is available
+      if (!browserCompat.contextMenus) {
+        console.error('contextMenus API not available');
+        return;
+      }
+
+      // Remove existing context menus first
+      try {
+        await browserCompat.contextMenus.removeAll();
+        console.log('Existing context menus removed');
+      } catch (removeError) {
+        console.warn('Failed to remove existing context menus:', removeError);
+        // Continue anyway - this might be the first run
+      }
       
       // Create main context menu item
-      await browserCompat.contextMenus.create({
-        id: 'save-to-turbodoc',
-        title: 'Save to Turbodoc',
-        contexts: ['page', 'link'],
-        documentUrlPatterns: ['http://*/*', 'https://*/*']
-      });
+      try {
+        await browserCompat.contextMenus.create({
+          id: 'save-to-turbodoc',
+          title: 'Save to Turbodoc',
+          contexts: ['page', 'link'],
+          documentUrlPatterns: ['http://*/*', 'https://*/*']
+        });
+        console.log('Main context menu created');
+      } catch (createError) {
+        console.error('Failed to create main context menu:', createError);
+        throw createError; // Re-throw to trigger fallback
+      }
 
       // Create link-specific context menu
-      await browserCompat.contextMenus.create({
-        id: 'save-link-to-turbodoc',
-        title: 'Save Link to Turbodoc',
-        contexts: ['link'],
-        documentUrlPatterns: ['http://*/*', 'https://*/*']
-      });
+      try {
+        await browserCompat.contextMenus.create({
+          id: 'save-link-to-turbodoc',
+          title: 'Save Link to Turbodoc',
+          contexts: ['link'],
+          documentUrlPatterns: ['http://*/*', 'https://*/*']
+        });
+        console.log('Link context menu created');
+      } catch (linkError) {
+        console.error('Failed to create link context menu:', linkError);
+        // Don't throw here - main menu is more important
+      }
 
+      console.log('Context menus setup completed successfully');
     } catch (error) {
       console.error('Failed to setup context menus:', error);
+      // Try a simpler fallback context menu
+      try {
+        await browserCompat.contextMenus.create({
+          id: 'save-to-turbodoc-fallback',
+          title: 'Save with Turbodoc',
+          contexts: ['page']
+        });
+        console.log('Fallback context menu created');
+      } catch (fallbackError) {
+        console.error('Even fallback context menu failed:', fallbackError);
+        throw new Error('Context menu creation completely failed');
+      }
     }
   }
 
@@ -178,7 +230,9 @@ class TurbodocBackground {
 
       let bookmarkData;
 
-      if (info.menuItemId === 'save-link-to-turbodoc' && info.linkUrl) {
+      if ((info.menuItemId === 'save-link-to-turbodoc' || 
+           info.menuItemId === 'save-to-turbodoc-fallback' || 
+           info.menuItemId === 'save-to-turbodoc-immediate') && info.linkUrl) {
         // Save the clicked link
         bookmarkData = {
           title: info.selectionText || info.linkUrl,
@@ -228,6 +282,14 @@ class TurbodocBackground {
       // First time installation
       console.log('Turbodoc extension installed');
       
+      // Immediately set up context menus on install
+      try {
+        await this.setupContextMenus();
+        console.log('Context menus created on install');
+      } catch (error) {
+        console.error('Failed to create context menus on install:', error);
+      }
+      
       // Optionally show welcome page
       // await browserCompat.tabs.create({ url: 'https://turbodoc.com/welcome' });
       
@@ -235,8 +297,20 @@ class TurbodocBackground {
       // Extension updated
       console.log(`Turbodoc extension updated to ${chrome.runtime.getManifest().version}`);
       
+      // Ensure context menus are still set up after update
+      try {
+        await this.setupContextMenus();
+        console.log('Context menus refreshed on update');
+      } catch (error) {
+        console.error('Failed to refresh context menus on update:', error);
+      }
+      
       // Process any pending offline items after update
-      await this.processOfflineQueue();
+      try {
+        await this.processOfflineQueue();
+      } catch (error) {
+        console.warn('Failed to process offline queue after update:', error);
+      }
     }
   }
 
@@ -381,6 +455,28 @@ class TurbodocBackground {
 
 // Initialize background service
 new TurbodocBackground();
+
+// Immediate context menu setup as backup (for Chrome store reviewers)
+// This runs synchronously to ensure context menus are available immediately
+try {
+  if (typeof chrome !== 'undefined' && chrome.contextMenus) {
+    // Create a basic context menu immediately without waiting for full initialization
+    chrome.contextMenus.create({
+      id: 'save-to-turbodoc-immediate',
+      title: 'Save to Turbodoc',
+      contexts: ['page'],
+      documentUrlPatterns: ['http://*/*', 'https://*/*']
+    }, () => {
+      if (chrome.runtime.lastError) {
+        console.warn('Immediate context menu creation failed:', chrome.runtime.lastError);
+      } else {
+        console.log('Immediate context menu created successfully');
+      }
+    });
+  }
+} catch (immediateError) {
+  console.warn('Immediate context menu setup failed:', immediateError);
+}
 
 // Export for testing (if in test environment)
 if (typeof module !== 'undefined' && module.exports) {
