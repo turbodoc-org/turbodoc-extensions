@@ -10,6 +10,10 @@ class TurbodocPopup {
     this.currentState = 'loading';
     this.currentTab = null;
     this.availableTags = [];
+    this.selectedTags = new Set();
+    this.tagsCache = null;
+    this.tagsCacheExpiry = null;
+    this.CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
     this.init();
   }
@@ -21,17 +25,14 @@ class TurbodocPopup {
     try {
       // Get current tab information
       await this.getCurrentTab();
-      
+
       // Initialize authentication
       await this.initializeAuth();
-      
+
       // Set up event listeners
       this.setupEventListeners();
-      
-      // Load user tags for autocomplete
-      if (this.api.isAuthenticated()) {
-        await this.loadUserTags();
-      }
+
+      // Tags will be loaded when showing bookmark form
     } catch (error) {
       console.error('Failed to initialize popup:', error);
       this.showError('Failed to initialize. Please try again.');
@@ -57,7 +58,7 @@ class TurbodocPopup {
     try {
       // Initialize API (which will initialize Supabase)
       await this.api.init();
-      
+
       if (this.api.isAuthenticated()) {
         // User is already authenticated via Supabase session
         this.showBookmarkForm();
@@ -117,6 +118,7 @@ class TurbodocPopup {
     tagsInput.addEventListener('input', (e) => this.handleTagsInput(e));
     tagsInput.addEventListener('focus', () => this.showTagsSuggestions());
     tagsInput.addEventListener('blur', () => this.hideTagsSuggestions());
+    tagsInput.addEventListener('change', () => this.parseTagsFromInput());
   }
 
   /**
@@ -124,11 +126,11 @@ class TurbodocPopup {
    */
   async handleLogin(event) {
     event.preventDefault();
-    
+
     const loginButton = document.getElementById('loginButton');
     const buttonText = loginButton.querySelector('.btn-text');
     const buttonSpinner = loginButton.querySelector('.btn-spinner');
-    
+
     // Show loading state
     buttonText.textContent = 'Signing In...';
     buttonSpinner.classList.remove('hidden');
@@ -140,11 +142,11 @@ class TurbodocPopup {
 
     try {
       const result = await this.api.login(email, password);
-      
+
       if (result.success) {
         // Load user tags
         // await this.loadUserTags(); TODO: Uncomment when endpoint exists
-        
+
         // Show bookmark form
         this.showBookmarkForm();
       } else {
@@ -190,11 +192,11 @@ class TurbodocPopup {
    */
   async handleSaveBookmark(event) {
     event.preventDefault();
-    
+
     const saveButton = document.getElementById('saveButton');
     const buttonText = saveButton.querySelector('.btn-text');
     const buttonSpinner = saveButton.querySelector('.btn-spinner');
-    
+
     // Show loading state
     buttonText.textContent = 'Saving...';
     buttonSpinner.classList.remove('hidden');
@@ -210,10 +212,10 @@ class TurbodocPopup {
 
     try {
       const result = await this.api.createBookmark(bookmarkData);
-      
+
       if (result.success) {
         this.showSuccess();
-        
+
         // Auto-close popup if preference is enabled
         const preferences = await this.storage.getPreferences();
         if (preferences.data?.autoClosePopup) {
@@ -260,7 +262,7 @@ class TurbodocPopup {
    * Parse tags from input string
    */
   parseTags(tagsString) {
-    if (!tagsString) {return '';}
+    if (!tagsString) { return ''; }
     return tagsString
       .split(',')
       .map(tag => tag.trim())
@@ -269,18 +271,32 @@ class TurbodocPopup {
   }
 
   /**
-   * Load user tags for autocomplete
+   * Load user tags for autocomplete with caching
    */
-  loadUserTags() {
+  async loadUserTags() {
     try {
-      // TODO: Add this when the endpoint exists
-      // const result = await this.api.getUserTags();
-      // if (result.success) {
-      // this.availableTags = result.data || [];
-      // }
-      this.availableTags = [];
+      // Check cache first
+      const now = Date.now();
+      if (this.tagsCache && this.tagsCacheExpiry && now < this.tagsCacheExpiry) {
+        this.availableTags = this.tagsCache;
+        this.displayTagChips();
+        return;
+      }
+
+      const result = await this.api.getUserTags();
+      if (result.success) {
+        this.availableTags = result.data || [];
+        // Cache the results
+        this.tagsCache = this.availableTags;
+        this.tagsCacheExpiry = now + this.CACHE_DURATION;
+        this.displayTagChips();
+      } else {
+        console.warn('Failed to load user tags:', result.error);
+        this.availableTags = [];
+      }
     } catch (error) {
       console.error('Failed to load user tags:', error);
+      this.availableTags = [];
     }
   }
 
@@ -294,9 +310,9 @@ class TurbodocPopup {
       .map(tag => tag.trim())
       .filter(tag => tag.length > 0);
     const lastTag = currentTags[currentTags.length - 1] || '';
-    
+
     if (lastTag.length > 0) {
-      const suggestions = this.availableTags.filter(tag => 
+      const suggestions = this.availableTags.filter(tag =>
         tag.toLowerCase().includes(lastTag.toLowerCase()) &&
         !currentTags.includes(tag)
       );
@@ -311,7 +327,7 @@ class TurbodocPopup {
    */
   showTagsSuggestions(suggestions = [], _currentTag = '') {
     const container = document.getElementById('tagsSuggestions');
-    
+
     if (!suggestions || suggestions.length === 0) {
       container.innerHTML = '';
       container.classList.remove('visible');
@@ -348,6 +364,76 @@ class TurbodocPopup {
   }
 
   /**
+   * Display tag suggestion chips
+   */
+  displayTagChips() {
+    const container = document.getElementById('tagSuggestionsChips');
+    if (!container || !this.availableTags.length) {
+      return;
+    }
+
+    const chipsHTML = this.availableTags
+      .slice(0, 7)
+      .map(tagData => {
+        const tagName = tagData.tag;
+        const isSelected = this.selectedTags.has(tagName);
+        return `
+          <div class="tag-chip ${isSelected ? 'selected' : ''}" data-tag="${tagName}">
+            <span class="tag-name">${tagName}</span>
+          </div>
+        `;
+      }).join('');
+
+    container.innerHTML = chipsHTML;
+
+    // Add click listeners to chips
+    container.querySelectorAll('.tag-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const tagName = chip.dataset.tag;
+        this.toggleTagSelection(tagName);
+      });
+    });
+  }
+
+  /**
+   * Toggle tag selection from chip
+   */
+  toggleTagSelection(tagName) {
+    if (this.selectedTags.has(tagName)) {
+      this.selectedTags.delete(tagName);
+    } else {
+      this.selectedTags.add(tagName);
+    }
+
+    this.updateTagsInput();
+    this.displayTagChips(); // Refresh chips to show selection state
+  }
+
+  /**
+   * Update the tags input field based on selected tags
+   */
+  updateTagsInput() {
+    const tagsInput = document.getElementById('tags');
+    const selectedTagsArray = Array.from(this.selectedTags);
+    tagsInput.value = selectedTagsArray.join(', ');
+  }
+
+  /**
+   * Parse tags from input and update selected tags set
+   */
+  parseTagsFromInput() {
+    const tagsInput = document.getElementById('tags');
+    const inputTags = tagsInput.value
+      .split(',')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
+
+    this.selectedTags.clear();
+    inputTags.forEach(tag => this.selectedTags.add(tag));
+    this.displayTagChips(); // Refresh chips to show selection state
+  }
+
+  /**
    * Select a tag from suggestions
    */
   selectTag(tag) {
@@ -357,10 +443,10 @@ class TurbodocPopup {
       .split(',')
       .map(tag => tag.trim())
       .filter(tag => tag.length > 0);
-    
+
     // Replace the last partial tag with the selected one
     currentTags[currentTags.length - 1] = tag;
-    
+
     tagsInput.value = currentTags.join(', ') + ', ';
     tagsInput.focus();
     this.hideTagsSuggestions();
@@ -374,10 +460,10 @@ class TurbodocPopup {
     document.getElementById('loginState').classList.remove('hidden');
     document.getElementById('popupFooter').classList.add('hidden');
     this.currentState = 'login';
-    
+
     // Clear form
     document.getElementById('loginForm').reset();
-    
+
     // Focus email input
     setTimeout(() => {
       document.getElementById('email').focus();
@@ -393,19 +479,26 @@ class TurbodocPopup {
     document.getElementById('bookmarkState').classList.remove('hidden');
     document.getElementById('popupFooter').classList.remove('hidden');
     this.currentState = 'bookmark';
-    
+
     // Pre-fill form with current tab data
     if (this.currentTab) {
       document.getElementById('title').value = this.currentTab.title || '';
       document.getElementById('url').value = this.currentTab.url || '';
     }
-    
+
+    // Clear selected tags
+    this.selectedTags.clear();
+    document.getElementById('tags').value = '';
+
+    // Load and display tag chips
+    this.loadUserTags();
+
     // Update user status
     const userStatus = document.getElementById('userStatus');
     if (this.api.getCurrentUser()) {
       userStatus.textContent = this.api.getCurrentUser().email;
     }
-    
+
     // Focus title input
     setTimeout(() => {
       document.getElementById('title').focus();
@@ -451,12 +544,12 @@ class TurbodocPopup {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
-    
+
     container.appendChild(toast);
-    
+
     // Show toast
     setTimeout(() => toast.classList.add('visible'), 10);
-    
+
     // Hide and remove toast
     setTimeout(() => {
       toast.classList.remove('visible');

@@ -247,6 +247,88 @@ body {
   background-color: hsl(var(--accent) / 0.1);
 }
 
+/* Tags Section */
+.tags-section {
+  position: relative;
+}
+
+/* Tag Suggestion Chips */
+.tag-suggestions-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+  min-height: 32px;
+  align-items: flex-start;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background-color: hsl(var(--secondary));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) * 0.4);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.tag-chip:hover {
+  background-color: hsl(var(--accent) / 0.1);
+  border-color: hsl(var(--accent) / 0.3);
+  transform: translateY(-1px);
+}
+
+.tag-chip.selected {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-color: hsl(var(--primary));
+}
+
+.tag-chip.selected:hover {
+  background-color: hsl(var(--primary) / 0.9);
+}
+
+.tag-name {
+  color: inherit;
+}
+
+.tag-count {
+  background-color: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  border-radius: 10px;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-weight: 600;
+  min-width: 16px;
+  text-align: center;
+}
+
+.tag-chip.selected .tag-count {
+  background-color: hsl(var(--primary-foreground) / 0.2);
+  color: hsl(var(--primary-foreground));
+}
+
+/* Empty state for tag chips */
+.tag-suggestions-chips:empty::before {
+  content: "Your most used tags will appear here";
+  color: hsl(var(--muted-foreground));
+  font-size: 11px;
+  font-style: italic;
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  height: 32px;
+}
+
+.tag-input {
+  width: 100%;
+}
+
 /* Buttons */
 .btn {
   display: flex;

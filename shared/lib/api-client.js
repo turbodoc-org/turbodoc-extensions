@@ -241,13 +241,20 @@ class TurbodocAPI {
    */
   async getUserTags() {
     try {
-      const response = await this.request('/user/tags');
+      await this.init();
+
+      if (!this.user) {
+        throw new Error('User not authenticated');
+      }
+
+      const response = await this.request('tags');
       
       return {
         success: true,
-        data: response.tags || []
+        data: response.data || []
       };
     } catch (error) {
+      console.error('Get user tags error:', error);
       return {
         success: false,
         error: this.getErrorMessage(error.message),
