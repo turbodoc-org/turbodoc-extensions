@@ -44,7 +44,10 @@ class TurbodocPopup {
    */
   async getCurrentTab() {
     try {
-      const tabs = await browserCompat.tabs.query({ active: true, currentWindow: true });
+      const tabs = await browserCompat.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
       this.currentTab = tabs[0];
     } catch (error) {
       console.error('Failed to get current tab:', error);
@@ -84,8 +87,12 @@ class TurbodocPopup {
     const signUpLinkButton = document.getElementById('signUpLinkButton');
     signUpLinkButton.addEventListener('click', () => this.openSignUpPage());
 
-    const forgotPasswordLinkButton = document.getElementById('forgotPasswordLinkButton');
-    forgotPasswordLinkButton.addEventListener('click', () => this.openForgotPasswordPage());
+    const forgotPasswordLinkButton = document.getElementById(
+      'forgotPasswordLinkButton',
+    );
+    forgotPasswordLinkButton.addEventListener('click', () =>
+      this.openForgotPasswordPage(),
+    );
 
     // Bookmark form
     const bookmarkForm = document.getElementById('bookmarkForm');
@@ -168,7 +175,9 @@ class TurbodocPopup {
    */
   async openSignUpPage() {
     try {
-      await browserCompat.tabs.create({ url: 'https://turbodoc.ai/auth/sign-up' });
+      await browserCompat.tabs.create({
+        url: 'https://turbodoc.ai/auth/sign-up',
+      });
       window.close();
     } catch (error) {
       console.error('Failed to open sign up page:', error);
@@ -180,7 +189,9 @@ class TurbodocPopup {
    */
   async openForgotPasswordPage() {
     try {
-      await browserCompat.tabs.create({ url: 'https://turbodoc.ai/auth/forgot-password' });
+      await browserCompat.tabs.create({
+        url: 'https://turbodoc.ai/auth/forgot-password',
+      });
       window.close();
     } catch (error) {
       console.error('Failed to open forgot password page:', error);
@@ -207,7 +218,7 @@ class TurbodocPopup {
       title: formData.get('title'),
       url: formData.get('url'),
       tags: this.parseTags(formData.get('tags')),
-      contentType: 'link'
+      contentType: 'link',
     };
 
     try {
@@ -225,12 +236,20 @@ class TurbodocPopup {
         }
       } else {
         // Try to save to offline queue if network error
-        if (result.error.includes('Network') || result.error.includes('Server')) {
+        if (
+          result.error.includes('Network') ||
+          result.error.includes('Server')
+        ) {
           await this.storage.addToOfflineQueue(bookmarkData);
-          this.showToast('Bookmark saved offline. Will sync when connection is restored.', 'info');
+          this.showToast(
+            'Bookmark saved offline. Will sync when connection is restored.',
+            'info',
+          );
           this.showSuccess();
         } else {
-          this.showError(result.error || 'Failed to save bookmark. Please try again.');
+          this.showError(
+            result.error || 'Failed to save bookmark. Please try again.',
+          );
         }
       }
     } catch (error) {
@@ -262,11 +281,13 @@ class TurbodocPopup {
    * Parse tags from input string
    */
   parseTags(tagsString) {
-    if (!tagsString) { return ''; }
+    if (!tagsString) {
+      return '';
+    }
     return tagsString
       .split(',')
-      .map(tag => tag.trim())
-      .filter(tag => tag.length > 0)
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0)
       .join('|');
   }
 
@@ -277,7 +298,11 @@ class TurbodocPopup {
     try {
       // Check cache first
       const now = Date.now();
-      if (this.tagsCache && this.tagsCacheExpiry && now < this.tagsCacheExpiry) {
+      if (
+        this.tagsCache &&
+        this.tagsCacheExpiry &&
+        now < this.tagsCacheExpiry
+      ) {
         this.availableTags = this.tagsCache;
         this.displayTagChips();
         return;
@@ -307,14 +332,15 @@ class TurbodocPopup {
     const input = event.target.value;
     const currentTags = input
       .split(',')
-      .map(tag => tag.trim())
-      .filter(tag => tag.length > 0);
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
     const lastTag = currentTags[currentTags.length - 1] || '';
 
     if (lastTag.length > 0) {
-      const suggestions = this.availableTags.filter(tag =>
-        tag.toLowerCase().includes(lastTag.toLowerCase()) &&
-        !currentTags.includes(tag)
+      const suggestions = this.availableTags.filter(
+        (tag) =>
+          tag.toLowerCase().includes(lastTag.toLowerCase()) &&
+          !currentTags.includes(tag),
       );
       this.showTagsSuggestions(suggestions, lastTag);
     } else {
@@ -336,17 +362,20 @@ class TurbodocPopup {
 
     const suggestionsHTML = suggestions
       .slice(0, 5) // Limit to 5 suggestions
-      .map(tag => `
+      .map(
+        (tag) => `
         <div class="tag-suggestion" data-tag="${tag}">
           ${tag}
         </div>
-      `).join('');
+      `,
+      )
+      .join('');
 
     container.innerHTML = suggestionsHTML;
     container.classList.add('visible');
 
     // Add click listeners to suggestions
-    container.querySelectorAll('.tag-suggestion').forEach(el => {
+    container.querySelectorAll('.tag-suggestion').forEach((el) => {
       el.addEventListener('click', () => {
         this.selectTag(el.dataset.tag);
       });
@@ -374,7 +403,7 @@ class TurbodocPopup {
 
     const chipsHTML = this.availableTags
       .slice(0, 7)
-      .map(tagData => {
+      .map((tagData) => {
         const tagName = tagData.tag;
         const isSelected = this.selectedTags.has(tagName);
         return `
@@ -382,12 +411,13 @@ class TurbodocPopup {
             <span class="tag-name">${tagName}</span>
           </div>
         `;
-      }).join('');
+      })
+      .join('');
 
     container.innerHTML = chipsHTML;
 
     // Add click listeners to chips
-    container.querySelectorAll('.tag-chip').forEach(chip => {
+    container.querySelectorAll('.tag-chip').forEach((chip) => {
       chip.addEventListener('click', () => {
         const tagName = chip.dataset.tag;
         this.toggleTagSelection(tagName);
@@ -425,11 +455,11 @@ class TurbodocPopup {
     const tagsInput = document.getElementById('tags');
     const inputTags = tagsInput.value
       .split(',')
-      .map(tag => tag.trim())
-      .filter(tag => tag.length > 0);
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
 
     this.selectedTags.clear();
-    inputTags.forEach(tag => this.selectedTags.add(tag));
+    inputTags.forEach((tag) => this.selectedTags.add(tag));
     this.displayTagChips(); // Refresh chips to show selection state
   }
 
@@ -441,8 +471,8 @@ class TurbodocPopup {
     const currentValue = tagsInput.value;
     const currentTags = currentValue
       .split(',')
-      .map(tag => tag.trim())
-      .filter(tag => tag.length > 0);
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
 
     // Replace the last partial tag with the selected one
     currentTags[currentTags.length - 1] = tag;
@@ -469,7 +499,6 @@ class TurbodocPopup {
       document.getElementById('email').focus();
     }, 100);
   }
-
 
   /**
    * Show bookmark form state
@@ -531,7 +560,7 @@ class TurbodocPopup {
    * Hide all state containers
    */
   hideAllStates() {
-    document.querySelectorAll('.state-container').forEach(el => {
+    document.querySelectorAll('.state-container').forEach((el) => {
       el.classList.add('hidden');
     });
   }

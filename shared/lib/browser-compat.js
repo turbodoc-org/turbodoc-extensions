@@ -30,7 +30,7 @@ const storage = {
         }
       });
     },
-    
+
     set: (items) => {
       return new Promise((resolve, reject) => {
         if (isFirefox) {
@@ -46,7 +46,7 @@ const storage = {
         }
       });
     },
-    
+
     remove: (keys) => {
       return new Promise((resolve, reject) => {
         if (isFirefox) {
@@ -62,7 +62,7 @@ const storage = {
         }
       });
     },
-    
+
     clear: () => {
       return new Promise((resolve, reject) => {
         if (isFirefox) {
@@ -77,8 +77,8 @@ const storage = {
           });
         }
       });
-    }
-  }
+    },
+  },
 };
 
 /**
@@ -100,7 +100,7 @@ const tabs = {
       }
     });
   },
-  
+
   create: (createProperties) => {
     return new Promise((resolve, reject) => {
       if (isFirefox) {
@@ -115,7 +115,7 @@ const tabs = {
         });
       }
     });
-  }
+  },
 };
 
 /**
@@ -137,7 +137,7 @@ const runtime = {
       }
     });
   },
-  
+
   onMessage: {
     addListener: (callback) => {
       if (isFirefox) {
@@ -145,18 +145,20 @@ const runtime = {
           return Promise.resolve(callback(message, sender));
         });
       } else {
-        browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
-          const result = callback(message, sender);
-          if (result && typeof result.then === 'function') {
-            result.then(sendResponse);
-            return true; // Indicates async response
-          } else {
-            sendResponse(result);
-          }
-        });
+        browserAPI.runtime.onMessage.addListener(
+          (message, sender, sendResponse) => {
+            const result = callback(message, sender);
+            if (result && typeof result.then === 'function') {
+              result.then(sendResponse);
+              return true; // Indicates async response
+            } else {
+              sendResponse(result);
+            }
+          },
+        );
       }
-    }
-  }
+    },
+  },
 };
 
 /**
@@ -178,7 +180,7 @@ const contextMenus = {
       }
     });
   },
-  
+
   removeAll: () => {
     return new Promise((resolve, reject) => {
       if (isFirefox) {
@@ -194,12 +196,12 @@ const contextMenus = {
       }
     });
   },
-  
+
   onClicked: {
     addListener: (callback) => {
       browserAPI.contextMenus.onClicked.addListener(callback);
-    }
-  }
+    },
+  },
 };
 
 /**
@@ -222,7 +224,7 @@ const action = {
       }
     });
   },
-  
+
   setBadgeBackgroundColor: (details) => {
     return new Promise((resolve, reject) => {
       const api = isFirefox ? browserAPI.browserAction : browserAPI.action;
@@ -238,7 +240,7 @@ const action = {
         });
       }
     });
-  }
+  },
 };
 
 // Export unified API
@@ -250,7 +252,7 @@ const api = {
   action,
   // Browser detection
   isChrome,
-  isFirefox
+  isFirefox,
 };
 
 // Make available in different environments

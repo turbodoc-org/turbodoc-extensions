@@ -22,8 +22,9 @@ const SUPABASE_CONFIG = {
 // Development vs Production configuration
 if (typeof chrome !== 'undefined' && chrome.runtime) {
   const manifest = chrome.runtime.getManifest();
-  const isDevelopment = manifest.name.includes('Dev') || manifest.version.includes('dev');
-  
+  const isDevelopment =
+    manifest.name.includes('Dev') || manifest.version.includes('dev');
+
   if (isDevelopment) {
     // Development configuration
     SUPABASE_CONFIG.url = '';
@@ -34,15 +35,22 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
 // Validate configuration
 function validateConfig() {
   if (!SUPABASE_CONFIG.url || SUPABASE_CONFIG.url.includes('your-project')) {
-    console.error('❌ Supabase URL not configured. Please update supabase-config.js');
+    console.error(
+      '❌ Supabase URL not configured. Please update supabase-config.js',
+    );
     return false;
   }
-  
-  if (!SUPABASE_CONFIG.anonKey || SUPABASE_CONFIG.anonKey.includes('your-anon-key')) {
-    console.error('❌ Supabase anon key not configured. Please update supabase-config.js');
+
+  if (
+    !SUPABASE_CONFIG.anonKey ||
+    SUPABASE_CONFIG.anonKey.includes('your-anon-key')
+  ) {
+    console.error(
+      '❌ Supabase anon key not configured. Please update supabase-config.js',
+    );
     return false;
   }
-  
+
   return true;
 }
 

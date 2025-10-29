@@ -39,7 +39,9 @@ class SupabaseLoader {
         return this.supabaseLib;
       }
 
-      throw new Error('Supabase client not available. Make sure supabase-bundle.js is loaded.');
+      throw new Error(
+        'Supabase client not available. Make sure supabase-bundle.js is loaded.',
+      );
     } catch (error) {
       console.error('Failed to load Supabase:', error);
       throw new Error('Supabase library could not be loaded');
@@ -53,7 +55,7 @@ class SupabaseLoader {
     if (this.supabaseLib && this.supabaseLib.createClient) {
       return this.supabaseLib.createClient;
     }
-    
+
     if (typeof createClient !== 'undefined') {
       return createClient;
     }
@@ -85,7 +87,7 @@ if (typeof module !== 'undefined' && module.exports) {
 (async () => {
   try {
     await supabaseLoader.loadSupabase();
-    
+
     // Make createClient globally available
     if (!this.createClient && supabaseLoader.getCreateClient) {
       this.createClient = supabaseLoader.getCreateClient();

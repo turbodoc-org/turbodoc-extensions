@@ -25,18 +25,18 @@ async function bundleSupabase() {
   const tempEntry = path.join(rootDir, 'temp-supabase-entry.js');
   const outputDir = path.join(rootDir, 'shared', 'lib');
   const outputFile = path.join(outputDir, 'supabase-bundle.js');
-  
+
   try {
     console.log('📦 Bundling Supabase client...');
-    
+
     // Create temporary entry file
     fs.writeFileSync(tempEntry, entryContent);
-    
+
     // Ensure output directory exists
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
-    
+
     // Bundle with esbuild
     await build({
       entryPoints: [tempEntry],
@@ -49,7 +49,7 @@ async function bundleSupabase() {
       target: 'es2020',
       define: {
         global: 'globalThis',
-        'process.env.NODE_ENV': '"production"'
+        'process.env.NODE_ENV': '"production"',
       },
       external: [],
       footer: {
@@ -59,21 +59,20 @@ if (typeof window !== 'undefined' && window.createSupabaseClient) {
   window.createClient = window.createSupabaseClient;
   window.supabase = { createClient: window.createSupabaseClient };
 }
-        `.trim()
-      }
+        `.trim(),
+      },
     });
-    
+
     // Clean up temp file
     if (fs.existsSync(tempEntry)) {
       fs.unlinkSync(tempEntry);
     }
-    
+
     const stats = fs.statSync(outputFile);
     const sizeKB = Math.round(stats.size / 1024);
-    
+
     console.log(`✅ Supabase bundle created: ${sizeKB} KB`);
     console.log(`📍 Output: ${path.relative(rootDir, outputFile)}`);
-    
   } catch (error) {
     console.error('❌ Failed to bundle Supabase:', error);
     throw error;

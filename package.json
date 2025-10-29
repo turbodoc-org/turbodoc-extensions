@@ -11,6 +11,7 @@
     "dev": "node build/build-extension.js dev",
     "clean": "node build/build-extension.js clean",
     "info": "node build/build-extension.js info",
+    "format": "npx @biomejs/biome format --write",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "jest",
@@ -29,6 +30,7 @@
     "@supabase/supabase-js": "^2.39.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.3.2",
     "chokidar": "^3.5.3",
     "esbuild": "^0.25.8",
     "eslint": "^8.57.0",

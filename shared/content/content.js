@@ -7,7 +7,7 @@ class TurbodocContent {
   constructor() {
     this.selectedText = '';
     this.pageMetadata = null;
-    
+
     this.init();
   }
 
@@ -17,13 +17,13 @@ class TurbodocContent {
   init() {
     // Extract page metadata on load
     this.extractPageMetadata();
-    
+
     // Set up event listeners
     this.setupEventListeners();
-    
+
     // Listen for messages from popup/background
     this.setupMessageListener();
-    
+
     console.log('Turbodoc content script initialized');
   }
 
@@ -61,52 +61,52 @@ class TurbodocContent {
    */
   handleMessage(message, sender, sendResponse) {
     switch (message.type) {
-    case 'GET_PAGE_METADATA': {
-      const response = {
-        metadata: this.pageMetadata,
-        selectedText: this.selectedText,
-        url: window.location.href,
-        title: document.title
-      };
-        
-      if (sendResponse) {
-        sendResponse(response);
+      case 'GET_PAGE_METADATA': {
+        const response = {
+          metadata: this.pageMetadata,
+          selectedText: this.selectedText,
+          url: window.location.href,
+          title: document.title,
+        };
+
+        if (sendResponse) {
+          sendResponse(response);
+        }
+        return response;
       }
-      return response;
-    }
 
-    case 'GET_SELECTED_TEXT': {
-      const textResponse = {
-        selectedText: this.selectedText,
-        hasSelection: this.selectedText.length > 0
-      };
-        
-      if (sendResponse) {
-        sendResponse(textResponse);
+      case 'GET_SELECTED_TEXT': {
+        const textResponse = {
+          selectedText: this.selectedText,
+          hasSelection: this.selectedText.length > 0,
+        };
+
+        if (sendResponse) {
+          sendResponse(textResponse);
+        }
+        return textResponse;
       }
-      return textResponse;
-    }
 
-    case 'EXTRACT_MAIN_CONTENT': {
-      const content = this.extractMainContent();
-      const contentResponse = {
-        content: content,
-        wordCount: content.split(/\s+/).length
-      };
-        
-      if (sendResponse) {
-        sendResponse(contentResponse);
+      case 'EXTRACT_MAIN_CONTENT': {
+        const content = this.extractMainContent();
+        const contentResponse = {
+          content: content,
+          wordCount: content.split(/\s+/).length,
+        };
+
+        if (sendResponse) {
+          sendResponse(contentResponse);
+        }
+        return contentResponse;
       }
-      return contentResponse;
-    }
 
-    case 'HIGHLIGHT_SAVED':
-      this.showSaveConfirmation();
-      break;
+      case 'HIGHLIGHT_SAVED':
+        this.showSaveConfirmation();
+        break;
 
-    default:
-      console.warn('Unknown message type:', message.type);
-      return { error: 'Unknown message type' };
+      default:
+        console.warn('Unknown message type:', message.type);
+        return { error: 'Unknown message type' };
     }
   }
 
@@ -134,7 +134,7 @@ class TurbodocContent {
       articleData: this.getArticleData(),
       siteName: this.getSiteName(),
       language: this.getLanguage(),
-      favicon: this.getFaviconUrl()
+      favicon: this.getFaviconUrl(),
     };
   }
 
@@ -143,14 +143,20 @@ class TurbodocContent {
    */
   getPageTitle() {
     const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) {return ogTitle.getAttribute('content');}
-    
+    if (ogTitle) {
+      return ogTitle.getAttribute('content');
+    }
+
     const title = document.querySelector('title');
-    if (title) {return title.textContent.trim();}
-    
+    if (title) {
+      return title.textContent.trim();
+    }
+
     const h1 = document.querySelector('h1');
-    if (h1) {return h1.textContent.trim();}
-    
+    if (h1) {
+      return h1.textContent.trim();
+    }
+
     return document.title || window.location.href;
   }
 
@@ -159,11 +165,15 @@ class TurbodocContent {
    */
   getMetaDescription() {
     const ogDesc = document.querySelector('meta[property="og:description"]');
-    if (ogDesc) {return ogDesc.getAttribute('content');}
-    
+    if (ogDesc) {
+      return ogDesc.getAttribute('content');
+    }
+
     const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {return metaDesc.getAttribute('content');}
-    
+    if (metaDesc) {
+      return metaDesc.getAttribute('content');
+    }
+
     return null;
   }
 
@@ -172,7 +182,12 @@ class TurbodocContent {
    */
   getMetaKeywords() {
     const keywords = document.querySelector('meta[name="keywords"]');
-    return keywords ? keywords.getAttribute('content').split(',').map(k => k.trim()) : [];
+    return keywords
+      ? keywords
+          .getAttribute('content')
+          .split(',')
+          .map((k) => k.trim())
+      : [];
   }
 
   /**
@@ -180,11 +195,17 @@ class TurbodocContent {
    */
   getMetaAuthor() {
     const author = document.querySelector('meta[name="author"]');
-    if (author) {return author.getAttribute('content');}
-    
-    const articleAuthor = document.querySelector('meta[property="article:author"]');
-    if (articleAuthor) {return articleAuthor.getAttribute('content');}
-    
+    if (author) {
+      return author.getAttribute('content');
+    }
+
+    const articleAuthor = document.querySelector(
+      'meta[property="article:author"]',
+    );
+    if (articleAuthor) {
+      return articleAuthor.getAttribute('content');
+    }
+
     return null;
   }
 
@@ -192,23 +213,33 @@ class TurbodocContent {
    * Get publish date
    */
   getPublishDate() {
-    const publishedTime = document.querySelector('meta[property="article:published_time"]');
-    if (publishedTime) {return publishedTime.getAttribute('content');}
-    
-    const datePublished = document.querySelector('meta[property="datePublished"]');
-    if (datePublished) {return datePublished.getAttribute('content');}
-    
+    const publishedTime = document.querySelector(
+      'meta[property="article:published_time"]',
+    );
+    if (publishedTime) {
+      return publishedTime.getAttribute('content');
+    }
+
+    const datePublished = document.querySelector(
+      'meta[property="datePublished"]',
+    );
+    if (datePublished) {
+      return datePublished.getAttribute('content');
+    }
+
     // Try to find date in structured data
     const jsonLd = document.querySelector('script[type="application/ld+json"]');
     if (jsonLd) {
       try {
         const data = JSON.parse(jsonLd.textContent);
-        if (data.datePublished) {return data.datePublished;}
+        if (data.datePublished) {
+          return data.datePublished;
+        }
       } catch (e) {
         // Ignore JSON parse errors
       }
     }
-    
+
     return null;
   }
 
@@ -226,13 +257,13 @@ class TurbodocContent {
   getOpenGraphData() {
     const ogTags = document.querySelectorAll('meta[property^="og:"]');
     const og = {};
-    
-    ogTags.forEach(tag => {
+
+    ogTags.forEach((tag) => {
       const property = tag.getAttribute('property').replace('og:', '');
       const content = tag.getAttribute('content');
       og[property] = content;
     });
-    
+
     return og;
   }
 
@@ -242,13 +273,13 @@ class TurbodocContent {
   getTwitterCardData() {
     const twitterTags = document.querySelectorAll('meta[name^="twitter:"]');
     const twitter = {};
-    
-    twitterTags.forEach(tag => {
+
+    twitterTags.forEach((tag) => {
       const name = tag.getAttribute('name').replace('twitter:', '');
       const content = tag.getAttribute('content');
       twitter[name] = content;
     });
-    
+
     return twitter;
   }
 
@@ -258,13 +289,13 @@ class TurbodocContent {
   getArticleData() {
     const articleTags = document.querySelectorAll('meta[property^="article:"]');
     const article = {};
-    
-    articleTags.forEach(tag => {
+
+    articleTags.forEach((tag) => {
       const property = tag.getAttribute('property').replace('article:', '');
       const content = tag.getAttribute('content');
       article[property] = content;
     });
-    
+
     return article;
   }
 
@@ -273,11 +304,15 @@ class TurbodocContent {
    */
   getSiteName() {
     const ogSiteName = document.querySelector('meta[property="og:site_name"]');
-    if (ogSiteName) {return ogSiteName.getAttribute('content');}
-    
+    if (ogSiteName) {
+      return ogSiteName.getAttribute('content');
+    }
+
     const siteName = document.querySelector('meta[name="application-name"]');
-    if (siteName) {return siteName.getAttribute('content');}
-    
+    if (siteName) {
+      return siteName.getAttribute('content');
+    }
+
     // Try to extract from hostname
     const hostname = window.location.hostname;
     return hostname.replace(/^www\./, '');
@@ -287,19 +322,24 @@ class TurbodocContent {
    * Get language
    */
   getLanguage() {
-    return document.documentElement.lang || 
-           document.querySelector('meta[http-equiv="content-language"]')?.getAttribute('content') ||
-           'en';
+    return (
+      document.documentElement.lang ||
+      document
+        .querySelector('meta[http-equiv="content-language"]')
+        ?.getAttribute('content') ||
+      'en'
+    );
   }
 
   /**
    * Get favicon URL
    */
   getFaviconUrl() {
-    const icon = document.querySelector('link[rel="icon"]') || 
-                 document.querySelector('link[rel="shortcut icon"]') ||
-                 document.querySelector('link[rel="apple-touch-icon"]');
-                 
+    const icon =
+      document.querySelector('link[rel="icon"]') ||
+      document.querySelector('link[rel="shortcut icon"]') ||
+      document.querySelector('link[rel="apple-touch-icon"]');
+
     if (icon) {
       const href = icon.getAttribute('href');
       if (href.startsWith('http')) {
@@ -310,7 +350,7 @@ class TurbodocContent {
         return new URL(href, window.location.href).href;
       }
     }
-    
+
     // Default favicon path
     return window.location.origin + '/favicon.ico';
   }
@@ -329,7 +369,7 @@ class TurbodocContent {
       '.post-content',
       '.entry-content',
       '#content',
-      '#main'
+      '#main',
     ];
 
     for (const selector of selectors) {
@@ -341,19 +381,30 @@ class TurbodocContent {
 
     // Fallback: extract from body but exclude navigation, footer, etc.
     const body = document.body.cloneNode(true);
-    
+
     // Remove unwanted elements
     const unwantedSelectors = [
-      'nav', 'header', 'footer', 'aside',
-      '.navigation', '.nav', '.menu',
-      '.sidebar', '.footer', '.header',
-      '.advertisement', '.ads', '.ad',
-      'script', 'style', 'noscript'
+      'nav',
+      'header',
+      'footer',
+      'aside',
+      '.navigation',
+      '.nav',
+      '.menu',
+      '.sidebar',
+      '.footer',
+      '.header',
+      '.advertisement',
+      '.ads',
+      '.ad',
+      'script',
+      'style',
+      'noscript',
     ];
 
-    unwantedSelectors.forEach(selector => {
+    unwantedSelectors.forEach((selector) => {
       const elements = body.querySelectorAll(selector);
-      elements.forEach(el => el.remove());
+      elements.forEach((el) => el.remove());
     });
 
     return this.extractTextContent(body);
@@ -365,14 +416,14 @@ class TurbodocContent {
   extractTextContent(element) {
     // Clone to avoid modifying original
     const clone = element.cloneNode(true);
-    
+
     // Remove script and style elements
     const scripts = clone.querySelectorAll('script, style');
-    scripts.forEach(el => el.remove());
-    
+    scripts.forEach((el) => el.remove());
+
     // Get text content and clean it up
     const text = clone.textContent || clone.innerText || '';
-    
+
     return text
       .replace(/\s+/g, ' ') // Normalize whitespace
       .replace(/\n+/g, '\n') // Normalize line breaks
@@ -400,19 +451,19 @@ class TurbodocContent {
       }
     };
 
-    history.pushState = function() {
+    history.pushState = function () {
       originalPushState.apply(history, arguments);
       onUrlChange();
     };
 
-    history.replaceState = function() {
+    history.replaceState = function () {
       originalReplaceState.apply(history, arguments);
       onUrlChange();
     };
 
     // Listen for popstate (back/forward)
     window.addEventListener('popstate', onUrlChange);
-    
+
     // Listen for hashchange
     window.addEventListener('hashchange', onUrlChange);
   }
@@ -458,7 +509,6 @@ class TurbodocContent {
       }, 300);
     }, 2000);
   }
-
 }
 
 // Initialize content script when DOM is ready

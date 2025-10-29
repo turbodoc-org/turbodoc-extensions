@@ -10,7 +10,7 @@ class StorageManager {
       SUPABASE_SESSION: 'turbodoc-extension-auth', // Matches Supabase storage key
       PREFERENCES: 'turbodoc_preferences',
       OFFLINE_QUEUE: 'turbodoc_offline_queue',
-      LAST_SYNC: 'turbodoc_last_sync'
+      LAST_SYNC: 'turbodoc_last_sync',
     };
   }
 
@@ -22,18 +22,18 @@ class StorageManager {
       const authData = {
         token,
         expiresAt,
-        createdAt: Date.now()
+        createdAt: Date.now(),
       };
-      
+
       await this.storage.local.set({
-        [this.STORAGE_KEYS.AUTH_TOKEN]: authData
+        [this.STORAGE_KEYS.AUTH_TOKEN]: authData,
       });
-      
+
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: 'Failed to store authentication token' 
+      return {
+        success: false,
+        error: 'Failed to store authentication token',
       };
     }
   }
@@ -45,29 +45,32 @@ class StorageManager {
     try {
       const result = await this.storage.local.get(this.STORAGE_KEYS.AUTH_TOKEN);
       const authData = result[this.STORAGE_KEYS.AUTH_TOKEN];
-      
+
       if (!authData || !authData.token) {
         return { success: true, data: null };
       }
 
       // Check if token is expired
-      if (authData.expiresAt && Date.now() > new Date(authData.expiresAt).getTime()) {
+      if (
+        authData.expiresAt &&
+        Date.now() > new Date(authData.expiresAt).getTime()
+      ) {
         await this.clearAuthToken();
         return { success: true, data: null };
       }
 
-      return { 
-        success: true, 
+      return {
+        success: true,
         data: {
           token: authData.token,
           expiresAt: authData.expiresAt,
-          createdAt: authData.createdAt
-        }
+          createdAt: authData.createdAt,
+        },
       };
     } catch (error) {
-      return { 
-        success: false, 
-        error: 'Failed to retrieve authentication token' 
+      return {
+        success: false,
+        error: 'Failed to retrieve authentication token',
       };
     }
   }
@@ -80,9 +83,9 @@ class StorageManager {
       await this.storage.local.remove(this.STORAGE_KEYS.AUTH_TOKEN);
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: 'Failed to clear authentication token' 
+      return {
+        success: false,
+        error: 'Failed to clear authentication token',
       };
     }
   }
@@ -95,15 +98,15 @@ class StorageManager {
       await this.storage.local.set({
         [this.STORAGE_KEYS.USER_DATA]: {
           ...userData,
-          updatedAt: Date.now()
-        }
+          updatedAt: Date.now(),
+        },
       });
-      
+
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: 'Failed to store user data' 
+      return {
+        success: false,
+        error: 'Failed to store user data',
       };
     }
   }
@@ -115,15 +118,15 @@ class StorageManager {
     try {
       const result = await this.storage.local.get(this.STORAGE_KEYS.USER_DATA);
       const userData = result[this.STORAGE_KEYS.USER_DATA];
-      
-      return { 
-        success: true, 
-        data: userData || null 
+
+      return {
+        success: true,
+        data: userData || null,
       };
     } catch (error) {
-      return { 
-        success: false, 
-        error: 'Failed to retrieve user data' 
+      return {
+        success: false,
+        error: 'Failed to retrieve user data',
       };
     }
   }
@@ -136,9 +139,9 @@ class StorageManager {
       await this.storage.local.remove(this.STORAGE_KEYS.USER_DATA);
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: 'Failed to clear user data' 
+      return {
+        success: false,
+        error: 'Failed to clear user data',
       };
     }
   }
@@ -152,18 +155,18 @@ class StorageManager {
       const updatedPrefs = {
         ...currentPrefs.data,
         ...preferences,
-        updatedAt: Date.now()
+        updatedAt: Date.now(),
       };
 
       await this.storage.local.set({
-        [this.STORAGE_KEYS.PREFERENCES]: updatedPrefs
+        [this.STORAGE_KEYS.PREFERENCES]: updatedPrefs,
       });
-      
+
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: 'Failed to store preferences' 
+      return {
+        success: false,
+        error: 'Failed to store preferences',
       };
     }
   }
@@ -173,18 +176,21 @@ class StorageManager {
    */
   async getPreferences() {
     try {
-      const result = await this.storage.local.get(this.STORAGE_KEYS.PREFERENCES);
-      const preferences = result[this.STORAGE_KEYS.PREFERENCES] || this.getDefaultPreferences();
-      
-      return { 
-        success: true, 
-        data: preferences 
+      const result = await this.storage.local.get(
+        this.STORAGE_KEYS.PREFERENCES,
+      );
+      const preferences =
+        result[this.STORAGE_KEYS.PREFERENCES] || this.getDefaultPreferences();
+
+      return {
+        success: true,
+        data: preferences,
       };
     } catch (error) {
-      return { 
-        success: false, 
+      return {
+        success: false,
         error: 'Failed to retrieve preferences',
-        data: this.getDefaultPreferences()
+        data: this.getDefaultPreferences(),
       };
     }
   }
@@ -198,7 +204,7 @@ class StorageManager {
       autoCloseDelay: 1500,
       showNotifications: true,
       defaultTags: [],
-      theme: 'light'
+      theme: 'light',
     };
   }
 
@@ -207,24 +213,26 @@ class StorageManager {
    */
   async addToOfflineQueue(bookmarkData) {
     try {
-      const result = await this.storage.local.get(this.STORAGE_KEYS.OFFLINE_QUEUE);
+      const result = await this.storage.local.get(
+        this.STORAGE_KEYS.OFFLINE_QUEUE,
+      );
       const queue = result[this.STORAGE_KEYS.OFFLINE_QUEUE] || [];
-      
+
       queue.push({
         ...bookmarkData,
         id: Date.now() + Math.random(), // Temporary ID
-        queuedAt: Date.now()
+        queuedAt: Date.now(),
       });
 
       await this.storage.local.set({
-        [this.STORAGE_KEYS.OFFLINE_QUEUE]: queue
+        [this.STORAGE_KEYS.OFFLINE_QUEUE]: queue,
       });
-      
+
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: 'Failed to add bookmark to offline queue' 
+      return {
+        success: false,
+        error: 'Failed to add bookmark to offline queue',
       };
     }
   }
@@ -234,18 +242,20 @@ class StorageManager {
    */
   async getOfflineQueue() {
     try {
-      const result = await this.storage.local.get(this.STORAGE_KEYS.OFFLINE_QUEUE);
+      const result = await this.storage.local.get(
+        this.STORAGE_KEYS.OFFLINE_QUEUE,
+      );
       const queue = result[this.STORAGE_KEYS.OFFLINE_QUEUE] || [];
-      
-      return { 
-        success: true, 
-        data: queue 
+
+      return {
+        success: true,
+        data: queue,
       };
     } catch (error) {
-      return { 
-        success: false, 
+      return {
+        success: false,
         error: 'Failed to retrieve offline queue',
-        data: []
+        data: [],
       };
     }
   }
@@ -255,20 +265,22 @@ class StorageManager {
    */
   async removeFromOfflineQueue(itemId) {
     try {
-      const result = await this.storage.local.get(this.STORAGE_KEYS.OFFLINE_QUEUE);
+      const result = await this.storage.local.get(
+        this.STORAGE_KEYS.OFFLINE_QUEUE,
+      );
       const queue = result[this.STORAGE_KEYS.OFFLINE_QUEUE] || [];
-      
-      const updatedQueue = queue.filter(item => item.id !== itemId);
+
+      const updatedQueue = queue.filter((item) => item.id !== itemId);
 
       await this.storage.local.set({
-        [this.STORAGE_KEYS.OFFLINE_QUEUE]: updatedQueue
+        [this.STORAGE_KEYS.OFFLINE_QUEUE]: updatedQueue,
       });
-      
+
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: 'Failed to remove item from offline queue' 
+      return {
+        success: false,
+        error: 'Failed to remove item from offline queue',
       };
     }
   }
@@ -281,9 +293,9 @@ class StorageManager {
       await this.storage.local.remove(this.STORAGE_KEYS.OFFLINE_QUEUE);
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: 'Failed to clear offline queue' 
+      return {
+        success: false,
+        error: 'Failed to clear offline queue',
       };
     }
   }
@@ -294,14 +306,14 @@ class StorageManager {
   async setLastSync(timestamp = Date.now()) {
     try {
       await this.storage.local.set({
-        [this.STORAGE_KEYS.LAST_SYNC]: timestamp
+        [this.STORAGE_KEYS.LAST_SYNC]: timestamp,
       });
-      
+
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: 'Failed to set last sync timestamp' 
+      return {
+        success: false,
+        error: 'Failed to set last sync timestamp',
       };
     }
   }
@@ -313,16 +325,16 @@ class StorageManager {
     try {
       const result = await this.storage.local.get(this.STORAGE_KEYS.LAST_SYNC);
       const lastSync = result[this.STORAGE_KEYS.LAST_SYNC] || 0;
-      
-      return { 
-        success: true, 
-        data: lastSync 
+
+      return {
+        success: true,
+        data: lastSync,
       };
     } catch (error) {
-      return { 
-        success: false, 
+      return {
+        success: false,
         error: 'Failed to retrieve last sync timestamp',
-        data: 0
+        data: 0,
       };
     }
   }
@@ -335,9 +347,9 @@ class StorageManager {
       await this.storage.local.clear();
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: 'Failed to clear all data' 
+      return {
+        success: false,
+        error: 'Failed to clear all data',
       };
     }
   }
@@ -352,18 +364,19 @@ class StorageManager {
         totalKeys: Object.keys(allData).length,
         authTokenExists: !!allData[this.STORAGE_KEYS.AUTH_TOKEN],
         userDataExists: !!allData[this.STORAGE_KEYS.USER_DATA],
-        offlineQueueLength: (allData[this.STORAGE_KEYS.OFFLINE_QUEUE] || []).length,
-        lastSync: allData[this.STORAGE_KEYS.LAST_SYNC] || 0
+        offlineQueueLength: (allData[this.STORAGE_KEYS.OFFLINE_QUEUE] || [])
+          .length,
+        lastSync: allData[this.STORAGE_KEYS.LAST_SYNC] || 0,
       };
-      
-      return { 
-        success: true, 
-        data: stats 
+
+      return {
+        success: true,
+        data: stats,
       };
     } catch (error) {
-      return { 
-        success: false, 
-        error: 'Failed to get storage stats' 
+      return {
+        success: false,
+        error: 'Failed to get storage stats',
       };
     }
   }

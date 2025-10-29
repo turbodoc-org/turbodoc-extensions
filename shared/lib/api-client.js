@@ -9,7 +9,7 @@ class TurbodocAPI {
     this.session = null;
     this.user = null;
     this.isInitialized = false;
-    
+
     this.init();
   }
 
@@ -17,7 +17,9 @@ class TurbodocAPI {
    * Initialize Supabase client
    */
   async init() {
-    if (this.isInitialized) {return;}
+    if (this.isInitialized) {
+      return;
+    }
 
     try {
       // Validate configuration
@@ -32,17 +34,23 @@ class TurbodocAPI {
         console.log('Initializing Supabase client...');
         console.log('Supabase URL:', SUPABASE_CONFIG.url);
         console.log('Anon Key:', SUPABASE_CONFIG.anonKey ? '***' : 'Not set');
-        this.supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, {
-          auth: {
-            autoRefreshToken: SUPABASE_CONFIG.auth.autoRefreshToken,
-            persistSession: SUPABASE_CONFIG.auth.persistSession,
-            storageKey: SUPABASE_CONFIG.auth.storageKey,
-            storage: new SupabaseExtensionStorage()
-          }
-        });
+        this.supabase = createClient(
+          SUPABASE_CONFIG.url,
+          SUPABASE_CONFIG.anonKey,
+          {
+            auth: {
+              autoRefreshToken: SUPABASE_CONFIG.auth.autoRefreshToken,
+              persistSession: SUPABASE_CONFIG.auth.persistSession,
+              storageKey: SUPABASE_CONFIG.auth.storageKey,
+              storage: new SupabaseExtensionStorage(),
+            },
+          },
+        );
 
         // Get initial session
-        const { data: { session } } = await this.supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await this.supabase.auth.getSession();
         this.setSession(session);
 
         // Listen for auth changes
@@ -87,7 +95,7 @@ class TurbodocAPI {
     const url = getApiUrl(endpoint);
     const headers = {
       'Content-Type': 'application/json',
-      ...options.headers
+      ...options.headers,
     };
 
     if (this.session?.access_token) {
@@ -102,7 +110,7 @@ class TurbodocAPI {
 
     try {
       const response = await fetch(url, requestOptions);
-      
+
       if (!response.ok) {
         if (response.status === 401) {
           throw new Error('UNAUTHORIZED');
@@ -116,7 +124,7 @@ class TurbodocAPI {
         if (response.status >= 500) {
           throw new Error('SERVER_ERROR');
         }
-        
+
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || `HTTP ${response.status}`);
       }
@@ -131,7 +139,6 @@ class TurbodocAPI {
     }
   }
 
-
   /**
    * Authenticate user with Supabase
    */
@@ -145,7 +152,7 @@ class TurbodocAPI {
 
       const { data, error } = await this.supabase.auth.signInWithPassword({
         email,
-        password
+        password,
       });
 
       if (error) {
@@ -158,18 +165,16 @@ class TurbodocAPI {
         success: true,
         data: {
           session: data.session,
-          user: data.user
-        }
+          user: data.user,
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: this.getErrorMessage(error.message)
+        error: this.getErrorMessage(error.message),
       };
     }
   }
-
-
 
   /**
    * Logout user
@@ -195,7 +200,6 @@ class TurbodocAPI {
     }
   }
 
-
   /**
    * Create new bookmark
    */
@@ -211,30 +215,29 @@ class TurbodocAPI {
       const payload = {
         title: bookmarkData.title,
         url: bookmarkData.url,
-        tags: Array.isArray(bookmarkData.tags) ? bookmarkData.tags.join(',') : bookmarkData.tags || '',
-        status: 'unread' // Default status
+        tags: Array.isArray(bookmarkData.tags)
+          ? bookmarkData.tags.join(',')
+          : bookmarkData.tags || '',
+        status: 'unread', // Default status
       };
 
       const response = await this.request('bookmarks', {
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error) {
       console.error('Create bookmark error:', error);
       return {
         success: false,
-        error: this.getErrorMessage(error.message)
+        error: this.getErrorMessage(error.message),
       };
     }
   }
-
-
-
 
   /**
    * Get user tags for autocomplete
@@ -248,36 +251,37 @@ class TurbodocAPI {
       }
 
       const response = await this.request('tags');
-      
+
       return {
         success: true,
-        data: response.data || []
+        data: response.data || [],
       };
     } catch (error) {
       console.error('Get user tags error:', error);
       return {
         success: false,
         error: this.getErrorMessage(error.message),
-        data: []
+        data: [],
       };
     }
   }
-
 
   /**
    * Convert error codes to user-friendly messages
    */
   getErrorMessage(errorCode) {
     const errorMessages = {
-      'UNAUTHORIZED': 'Please sign in to continue',
-      'FORBIDDEN': 'Access denied',
-      'NOT_FOUND': 'Resource not found',
-      'SERVER_ERROR': 'Server error. Please try again later',
-      'NETWORK_ERROR': 'Network error. Please check your connection',
-      'TIMEOUT': 'Request timeout. Please try again'
+      UNAUTHORIZED: 'Please sign in to continue',
+      FORBIDDEN: 'Access denied',
+      NOT_FOUND: 'Resource not found',
+      SERVER_ERROR: 'Server error. Please try again later',
+      NETWORK_ERROR: 'Network error. Please check your connection',
+      TIMEOUT: 'Request timeout. Please try again',
     };
 
-    return errorMessages[errorCode] || errorCode || 'An unexpected error occurred';
+    return (
+      errorMessages[errorCode] || errorCode || 'An unexpected error occurred'
+    );
   }
 
   /**
@@ -321,28 +325,28 @@ class SupabaseExtensionStorage {
 
   async getItem(key) {
     await this.init();
-    
+
     if (this.storageManager) {
       const result = await this.storageManager.storage.local.get(key);
       return result[key] || null;
     }
-    
+
     // Fallback to localStorage if available
     if (typeof localStorage !== 'undefined') {
       return localStorage.getItem(key);
     }
-    
+
     return null;
   }
 
   async setItem(key, value) {
     await this.init();
-    
+
     if (this.storageManager) {
       await this.storageManager.storage.local.set({ [key]: value });
       return;
     }
-    
+
     // Fallback to localStorage if available
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem(key, value);
@@ -351,12 +355,12 @@ class SupabaseExtensionStorage {
 
   async removeItem(key) {
     await this.init();
-    
+
     if (this.storageManager) {
       await this.storageManager.storage.local.remove(key);
       return;
     }
-    
+
     // Fallback to localStorage if available
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem(key);

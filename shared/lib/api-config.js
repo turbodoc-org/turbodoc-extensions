@@ -28,7 +28,7 @@ function validateApiConfig() {
     console.error('❌ API base URL not configured');
     return false;
   }
-  
+
   return true;
 }
 
