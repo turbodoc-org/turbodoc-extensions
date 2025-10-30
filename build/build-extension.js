@@ -148,9 +148,17 @@ class ExtensionBuilder {
         for (const scriptPath of scriptPaths) {
           const fullPath = path.join(distDir, scriptPath.replace('../', ''));
           if (fs.existsSync(fullPath)) {
-            const scriptContent = fs.readFileSync(fullPath, 'utf8');
-            inlineScripts += `\n// === ${scriptPath} ===\n`;
-            inlineScripts += scriptContent + '\n';
+            const stats = fs.statSync(fullPath);
+            // Only read if it's a file, not a directory
+            if (stats.isFile()) {
+              const scriptContent = fs.readFileSync(fullPath, 'utf8');
+              inlineScripts += `\n// === ${scriptPath} ===\n`;
+              inlineScripts += scriptContent + '\n';
+            } else {
+              console.warn(
+                `⚠️  Skipping directory in importScripts: ${scriptPath}`,
+              );
+            }
           }
         }
 
@@ -274,6 +282,13 @@ class ExtensionBuilder {
   copyFile(src, dest) {
     const destDir = path.dirname(dest);
     this.ensureDir(destDir);
+
+    // Check if source is actually a file, not a directory
+    const stats = fs.statSync(src);
+    if (stats.isDirectory()) {
+      console.warn(`⚠️  Skipping directory in copyFile: ${src}`);
+      return;
+    }
 
     fs.copyFileSync(src, dest);
   }
