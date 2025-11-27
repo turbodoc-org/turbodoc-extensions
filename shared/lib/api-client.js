@@ -240,6 +240,41 @@ class TurbodocAPI {
   }
 
   /**
+   * Create new note
+   */
+  async createNote(noteData) {
+    try {
+      await this.init();
+
+      if (!this.user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Format payload according to Turbodoc API spec
+      const payload = {
+        title: noteData.title || '',
+        content: noteData.content || '',
+      };
+
+      const response = await this.request('notes', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      console.error('Create note error:', error);
+      return {
+        success: false,
+        error: this.getErrorMessage(error.message),
+      };
+    }
+  }
+
+  /**
    * Get user tags for autocomplete
    */
   async getUserTags() {

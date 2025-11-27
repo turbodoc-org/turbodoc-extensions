@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Turbodoc</title>
   <link rel="stylesheet" href="popup.css">
 </head>
+
 <body>
   <div class="popup-container">
     <!-- Header -->
@@ -28,25 +30,12 @@
       <form class="login-form" id="loginForm">
         <div class="form-group">
           <label for="email">Email</label>
-          <input 
-            type="email" 
-            id="email" 
-            name="email" 
-            required 
-            autocomplete="username"
-            placeholder="Enter your email"
-          >
+          <input type="email" id="email" name="email" required autocomplete="username" placeholder="Enter your email">
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input 
-            type="password" 
-            id="password" 
-            name="password" 
-            required 
-            autocomplete="current-password"
-            placeholder="Enter your password"
-          >
+          <input type="password" id="password" name="password" required autocomplete="current-password"
+            placeholder="Enter your password">
         </div>
         <button type="submit" class="btn btn-primary" id="loginButton">
           <span class="btn-text">Sign In</span>
@@ -64,46 +53,52 @@
     </div>
 
 
+    <!-- Note State -->
+    <div class="state-container hidden" id="noteState">
+      <form class="note-form" id="noteForm">
+        <div class="form-group">
+          <label for="noteTitle">Title <span class="optional">(optional)</span></label>
+          <input type="text" id="noteTitle" name="noteTitle" placeholder="Note title">
+        </div>
+
+        <div class="form-group">
+          <label for="noteContent">Content</label>
+          <textarea id="noteContent" name="noteContent" required rows="6"
+            placeholder="Write your note here..."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="saveNoteButton">
+            <span class="btn-text">Save Note</span>
+            <div class="btn-spinner hidden"></div>
+          </button>
+        </div>
+      </form>
+    </div>
+
     <!-- Bookmark State -->
     <div class="state-container hidden" id="bookmarkState">
       <form class="bookmark-form" id="bookmarkForm">
         <div class="form-group">
           <label for="title">Title</label>
-          <input 
-            type="text" 
-            id="title" 
-            name="title" 
-            required 
-            placeholder="Page title"
-          >
+          <input type="text" id="title" name="title" required placeholder="Page title">
         </div>
-        
+
         <div class="form-group">
           <label for="url">URL</label>
-          <input 
-            type="url" 
-            id="url" 
-            name="url" 
-            readonly 
-            class="url-field"
-          >
+          <input type="url" id="url" name="url" readonly class="url-field">
         </div>
-        
+
         <div class="form-group">
           <label for="tags">Tags <span class="optional">(optional)</span></label>
           <div class="tags-section">
             <div class="tag-suggestions-chips" id="tagSuggestionsChips"></div>
-            <input 
-              type="text" 
-              id="tags" 
-              name="tags"
-              class="tag-input"
-              placeholder="Comma-separated tags (e.g., research, tutorial)"
-            >
+            <input type="text" id="tags" name="tags" class="tag-input"
+              placeholder="Comma-separated tags (e.g., research, tutorial)">
             <div class="tags-suggestions" id="tagsSuggestions"></div>
           </div>
         </div>
-        
+
         <div class="form-actions">
           <button type="submit" class="btn btn-primary" id="saveButton">
             <span class="btn-text">Save Bookmark</span>
@@ -113,19 +108,38 @@
       </form>
     </div>
 
-    <!-- Success State -->
-    <div class="state-container hidden" id="successState">
+    <!-- Bookmark Success State -->
+    <div class="state-container hidden" id="bookmarkSuccessState">
       <div class="success-content">
         <div class="success-icon">✓</div>
         <h2 class="success-title">Bookmark Saved!</h2>
         <p class="success-message">Your bookmark has been saved to Turbodoc.</p>
         <div class="success-actions">
-          <button class="btn btn-secondary" id="saveAnotherButton">
+          <button class="btn btn-secondary" id="saveAnotherBookmarkButton">
             Save Another
           </button>
-          <button class="btn btn-link" id="viewBookmarksButton">
+          <a class="btn btn-link" href="https://turbodoc.ai/bookmarks" target="_blank"
+          rel="noopener noreferrer">
             View All Bookmarks
+        </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Note Success State -->
+    <div class="state-container hidden" id="noteSuccessState">
+      <div class="success-content">
+        <div class="success-icon">✓</div>
+        <h2 class="success-title">Note Saved!</h2>
+        <p class="success-message">Your note has been saved to Turbodoc.</p>
+        <div class="success-actions">
+          <button class="btn btn-secondary" id="saveAnotherNoteButton">
+            Save Another
           </button>
+          <a class="btn btn-link" href="https://turbodoc.ai/notes" target="_blank"
+          rel="noopener noreferrer">
+            View All Notes
+        </a>
         </div>
       </div>
     </div>
@@ -150,9 +164,20 @@
     <!-- Footer -->
     <footer class="popup-footer" id="popupFooter">
       <div class="footer-links">
-        <button class="link-button" id="openWebAppButton">
-          Open Web App
+        <button class="link-button" id="addNoteButton">
+          Add Note
         </button>
+        <button class="link-button" id="addBookmarkButton">
+          Add Bookmark
+        </button>
+        <a class="link-button" id="viewBookmarksButton" href="https://turbodoc.ai/bookmarks" target="_blank"
+          rel="noopener noreferrer">
+          View Bookmarks
+        </a>
+        <a class="link-button" id="viewNotesButton" href="https://turbodoc.ai/notes" target="_blank"
+          rel="noopener noreferrer">
+          View Notes
+        </a>
         <button class="link-button" id="signOutButton">
           Sign Out
         </button>
@@ -173,4 +198,5 @@
   <script src="../lib/api-client.js"></script>
   <script src="popup.js"></script>
 </body>
+
 </html>

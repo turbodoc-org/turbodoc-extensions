@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Turbodoc",
   "description": "One-click bookmarking for the modern web. Save and organize web content across all your devices.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "icons": {
     "16": "icons/icon-16.png",
     "48": "icons/icon-48.png",

@@ -198,6 +198,7 @@ body {
   border: 1px solid hsl(var(--input));
   border-radius: calc(var(--radius) * 0.5);
   font-size: 14px;
+  font-family: inherit;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   transition:
@@ -441,6 +442,10 @@ body {
 
 .form-actions .btn {
   flex: 1;
+}
+
+.hidden {
+  display: none;
 }
 
 /* Success State */

@@ -98,16 +98,27 @@ class TurbodocPopup {
     const bookmarkForm = document.getElementById('bookmarkForm');
     bookmarkForm.addEventListener('submit', (e) => this.handleSaveBookmark(e));
 
+    // Note form
+    const noteForm = document.getElementById('noteForm');
+    noteForm.addEventListener('submit', (e) => this.handleSaveNote(e));
+
     // Sign out button in footer
     const signOutButton = document.getElementById('signOutButton');
     signOutButton.addEventListener('click', () => this.handleLogout());
 
-    // Success state buttons
-    const saveAnotherButton = document.getElementById('saveAnotherButton');
-    saveAnotherButton.addEventListener('click', () => this.showBookmarkForm());
+    // Bookmark success state buttons
+    const saveAnotherBookmarkButton = document.getElementById(
+      'saveAnotherBookmarkButton',
+    );
+    saveAnotherBookmarkButton.addEventListener('click', () =>
+      this.showBookmarkForm(),
+    );
 
-    const viewBookmarksButton = document.getElementById('viewBookmarksButton');
-    viewBookmarksButton.addEventListener('click', () => this.openWebApp());
+    // Note success state buttons
+    const saveAnotherNoteButton = document.getElementById(
+      'saveAnotherNoteButton',
+    );
+    saveAnotherNoteButton.addEventListener('click', () => this.showNoteForm());
 
     // Error state buttons
     const retryButton = document.getElementById('retryButton');
@@ -116,9 +127,12 @@ class TurbodocPopup {
     const backButton = document.getElementById('backButton');
     backButton.addEventListener('click', () => this.showBookmarkForm());
 
-    // Footer buttons
-    const openWebAppButton = document.getElementById('openWebAppButton');
-    openWebAppButton.addEventListener('click', () => this.openWebApp());
+    // Footer navigation buttons
+    const addNoteButton = document.getElementById('addNoteButton');
+    addNoteButton.addEventListener('click', () => this.showNoteForm());
+
+    const addBookmarkButton = document.getElementById('addBookmarkButton');
+    addBookmarkButton.addEventListener('click', () => this.showBookmarkForm());
 
     // Tags input for autocomplete
     const tagsInput = document.getElementById('tags');
@@ -258,6 +272,69 @@ class TurbodocPopup {
     } finally {
       // Reset button state
       buttonText.textContent = 'Save Bookmark';
+      buttonSpinner.classList.add('hidden');
+      saveButton.disabled = false;
+    }
+  }
+
+  /**
+   * Handle note save
+   */
+  async handleSaveNote(event) {
+    event.preventDefault();
+
+    const saveButton = document.getElementById('saveNoteButton');
+    const buttonText = saveButton.querySelector('.btn-text');
+    const buttonSpinner = saveButton.querySelector('.btn-spinner');
+
+    // Show loading state
+    buttonText.textContent = 'Saving...';
+    buttonSpinner.classList.remove('hidden');
+    saveButton.disabled = true;
+
+    const formData = new FormData(event.target);
+    const noteData = {
+      title: formData.get('noteTitle') || '',
+      content: formData.get('noteContent'),
+    };
+
+    try {
+      const result = await this.api.createNote(noteData);
+
+      if (result.success) {
+        this.showSuccess('note');
+
+        // Auto-close popup if preference is enabled
+        const preferences = await this.storage.getPreferences();
+        if (preferences.data?.autoClosePopup) {
+          setTimeout(() => {
+            window.close();
+          }, preferences.data?.autoCloseDelay || 1500);
+        }
+      } else {
+        // Try to save to offline queue if network error
+        if (
+          result.error.includes('Network') ||
+          result.error.includes('Server')
+        ) {
+          await this.storage.addToOfflineQueue(noteData);
+          this.showToast(
+            'Note saved offline. Will sync when connection is restored.',
+            'info',
+          );
+          this.showSuccess('note');
+        } else {
+          this.showError(
+            result.error || 'Failed to save note. Please try again.',
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Save note error:', error);
+      this.showError('Network error. Please check your connection.');
+    } finally {
+      // Reset button state
+      buttonText.textContent = 'Save Note';
       buttonSpinner.classList.add('hidden');
       saveButton.disabled = false;
     }
@@ -509,6 +586,10 @@ class TurbodocPopup {
     document.getElementById('popupFooter').classList.remove('hidden');
     this.currentState = 'bookmark';
 
+    // Hide add bookmark button, show add note button
+    document.getElementById('addBookmarkButton').classList.add('hidden');
+    document.getElementById('addNoteButton').classList.remove('hidden');
+
     // Pre-fill form with current tab data
     if (this.currentTab) {
       document.getElementById('title').value = this.currentTab.title || '';
@@ -536,11 +617,56 @@ class TurbodocPopup {
   }
 
   /**
+   * Show note form state
+   */
+  showNoteForm() {
+    this.hideAllStates();
+    document.getElementById('noteState').classList.remove('hidden');
+    document.getElementById('popupFooter').classList.remove('hidden');
+    this.currentState = 'note';
+
+    // Hide add note button, show add bookmark button
+    document.getElementById('addNoteButton').classList.add('hidden');
+    document.getElementById('addBookmarkButton').classList.remove('hidden');
+
+    // Pre-fill content with current URL
+    const noteContent = document.getElementById('noteContent');
+    if (this.currentTab) {
+      noteContent.value = `Source: ${this.currentTab.url}\n\n`;
+    }
+
+    // Clear title
+    document.getElementById('noteTitle').value = '';
+
+    // Update user status
+    const userStatus = document.getElementById('userStatus');
+    if (this.api.getCurrentUser()) {
+      userStatus.textContent = this.api.getCurrentUser().email;
+    }
+
+    // Focus content textarea
+    setTimeout(() => {
+      noteContent.focus();
+      // Position cursor at end after URL
+      noteContent.setSelectionRange(
+        noteContent.value.length,
+        noteContent.value.length,
+      );
+    }, 100);
+  }
+
+  /**
    * Show success state
    */
-  showSuccess() {
+  showSuccess(type = 'bookmark') {
     this.hideAllStates();
-    document.getElementById('successState').classList.remove('hidden');
+    if (type === 'note') {
+      document.getElementById('noteSuccessState').classList.remove('hidden');
+    } else {
+      document
+        .getElementById('bookmarkSuccessState')
+        .classList.remove('hidden');
+    }
     document.getElementById('popupFooter').classList.remove('hidden');
     this.currentState = 'success';
   }
@@ -584,18 +710,6 @@ class TurbodocPopup {
       toast.classList.remove('visible');
       setTimeout(() => container.removeChild(toast), 300);
     }, duration);
-  }
-
-  /**
-   * Open web app in new tab
-   */
-  async openWebApp() {
-    try {
-      await browserCompat.tabs.create({ url: 'https://turbodoc.ai' });
-      window.close();
-    } catch (error) {
-      console.error('Failed to open web app:', error);
-    }
   }
 
   /**
