@@ -253,10 +253,11 @@ class TurbodocAPI {
       // Format payload according to Turbodoc API spec
       const payload = {
         title: noteData.title || '',
-        content: noteData.content || '',
+        markdown: noteData.content || '',
+        device_id: `extension-${this.user.id}`,
       };
 
-      const response = await this.request('notes', {
+      const response = await this.request('v2/documents', {
         method: 'POST',
         body: JSON.stringify(payload),
       });

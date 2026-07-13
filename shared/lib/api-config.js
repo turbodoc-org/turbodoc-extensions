@@ -17,6 +17,9 @@ const API_CONFIG = {
 function getApiUrl(endpoint) {
   // Remove leading slash if present
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+  if (/^v\d+\//.test(cleanEndpoint)) {
+    return `${API_CONFIG.baseUrl}/${cleanEndpoint}`;
+  }
   return `${API_CONFIG.baseUrl}/${API_CONFIG.version}/${cleanEndpoint}`;
 }
 
