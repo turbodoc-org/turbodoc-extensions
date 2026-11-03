@@ -13,175 +13,160 @@
     <!-- Header -->
     <header class="popup-header">
       <div class="logo">
-        <img src="../icons/icon-48.png" alt="Turbodoc" class="logo-icon">
-        <h1 class="logo-text">Turbodoc</h1>
+        <img src="../icons/icon-48.png" alt="" class="logo-icon">
+        <span class="logo-text">Turbodoc</span>
       </div>
-      <div class="user-status" id="userStatus"></div>
+
+      <div class="mode-switch hidden" id="modeSwitch" role="tablist" aria-label="What to save">
+        <button type="button" class="mode-option active" id="modeBookmark" role="tab" aria-selected="true">
+          Bookmark
+        </button>
+        <button type="button" class="mode-option" id="modeNote" role="tab" aria-selected="false">
+          Note
+        </button>
+      </div>
     </header>
 
-    <!-- Loading State -->
-    <div class="state-container" id="loadingState">
-      <div class="loading-spinner"></div>
-      <p class="loading-text">Loading...</p>
-    </div>
+    <main class="popup-main">
+      <!-- Loading State -->
+      <div class="state-container" id="loadingState">
+        <div class="loading-spinner"></div>
+      </div>
 
-    <!-- Login State -->
-    <div class="state-container hidden" id="loginState">
-      <form class="login-form" id="loginForm">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" required autocomplete="username" placeholder="Enter your email">
+      <!-- Login State -->
+      <div class="state-container hidden" id="loginState">
+        <div class="state-intro">
+          <h1 class="state-title">Sign in</h1>
+          <p class="state-subtitle">Save pages and notes to Turbodoc in one click.</p>
         </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" required autocomplete="current-password"
-            placeholder="Enter your password">
-        </div>
-        <button type="submit" class="btn btn-primary" id="loginButton">
-          <span class="btn-text">Sign In</span>
-          <div class="btn-spinner hidden"></div>
-        </button>
-        <div class="auth-links">
-          <button type="button" class="btn btn-link" id="forgotPasswordLinkButton">
-            Forgot password?
+        <form class="stack" id="loginForm">
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required autocomplete="username" placeholder="you@example.com">
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required autocomplete="current-password"
+              placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn btn-primary" id="loginButton">
+            <span class="btn-text">Sign in</span>
+            <span class="btn-spinner hidden"></span>
           </button>
-          <button class="link-button hidden" id="signUpLinkButton">
-            Don't have an account? Sign up
+          <div class="auth-links">
+            <button type="button" class="text-link" id="forgotPasswordLinkButton">Forgot password?</button>
+            <button type="button" class="text-link hidden" id="signUpLinkButton">Create an account</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Bookmark State -->
+      <div class="state-container hidden" id="bookmarkState">
+        <form class="stack" id="bookmarkForm">
+          <div class="page-card">
+            <div class="page-favicon" id="pageFavicon" aria-hidden="true"></div>
+            <div class="page-meta">
+              <label for="title" class="sr-only">Title</label>
+              <input type="text" id="title" name="title" required placeholder="Untitled page" class="page-title"
+                autocomplete="off" spellcheck="false">
+              <div class="page-url" id="urlDisplay"></div>
+              <input type="hidden" id="url" name="url">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="tags">Tags</label>
+            <div class="tag-field" id="tagField">
+              <div class="selected-tags" id="selectedTags"></div>
+              <input type="text" id="tags" class="tag-input" placeholder="Add tags…" autocomplete="off"
+                spellcheck="false" role="combobox" aria-autocomplete="list" aria-controls="tagsSuggestions"
+                aria-expanded="false">
+              <div class="tags-dropdown" id="tagsSuggestions" role="listbox"></div>
+            </div>
+            <!-- Fixed-height single row: content can load in without shifting the layout -->
+            <div class="suggested-tags" id="tagSuggestionsChips" aria-label="Suggested tags"></div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="saveButton">
+            <span class="btn-text">Save bookmark</span>
+            <span class="btn-spinner hidden"></span>
           </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
 
-
-    <!-- Note State -->
-    <div class="state-container hidden" id="noteState">
-      <form class="note-form" id="noteForm">
-        <div class="form-group">
-          <label for="noteTitle">Title <span class="optional">(optional)</span></label>
-          <input type="text" id="noteTitle" name="noteTitle" placeholder="Note title">
-        </div>
-
-        <div class="form-group">
-          <label for="noteContent">Content</label>
-          <textarea id="noteContent" name="noteContent" required rows="6"
-            placeholder="Write your note here..."></textarea>
-        </div>
-
-        <div class="form-actions">
+      <!-- Note State -->
+      <div class="state-container hidden" id="noteState">
+        <form class="stack" id="noteForm">
+          <div class="field">
+            <label for="noteTitle" class="sr-only">Title</label>
+            <input type="text" id="noteTitle" name="noteTitle" placeholder="Title (optional)" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="noteContent" class="sr-only">Content</label>
+            <textarea id="noteContent" name="noteContent" required rows="7"
+              placeholder="Write your note…"></textarea>
+          </div>
           <button type="submit" class="btn btn-primary" id="saveNoteButton">
-            <span class="btn-text">Save Note</span>
-            <div class="btn-spinner hidden"></div>
+            <span class="btn-text">Save note</span>
+            <span class="btn-spinner hidden"></span>
           </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
 
-    <!-- Bookmark State -->
-    <div class="state-container hidden" id="bookmarkState">
-      <form class="bookmark-form" id="bookmarkForm">
-        <div class="form-group">
-          <label for="title">Title</label>
-          <input type="text" id="title" name="title" required placeholder="Page title">
-        </div>
-
-        <div class="form-group">
-          <label for="url">URL</label>
-          <input type="url" id="url" name="url" readonly class="url-field">
-        </div>
-
-        <div class="form-group">
-          <label for="tags">Tags <span class="optional">(optional)</span></label>
-          <div class="tags-section">
-            <div class="tag-suggestions-chips" id="tagSuggestionsChips"></div>
-            <input type="text" id="tags" name="tags" class="tag-input"
-              placeholder="Comma-separated tags (e.g., research, tutorial)">
-            <div class="tags-suggestions" id="tagsSuggestions"></div>
+      <!-- Success State -->
+      <div class="state-container hidden" id="successState">
+        <div class="status-content">
+          <div class="status-icon status-icon-success">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          </div>
+          <h2 class="state-title" id="successTitle">Bookmark saved</h2>
+          <p class="state-subtitle" id="successMessage">It's ready in your Turbodoc library.</p>
+          <div class="status-actions">
+            <a class="btn btn-secondary" id="successLink" href="https://turbodoc.ai/bookmarks" target="_blank"
+              rel="noopener noreferrer">View bookmarks</a>
+            <button type="button" class="btn btn-primary" id="doneButton">Done</button>
           </div>
         </div>
+      </div>
 
-        <div class="form-actions">
-          <button type="submit" class="btn btn-primary" id="saveButton">
-            <span class="btn-text">Save Bookmark</span>
-            <div class="btn-spinner hidden"></div>
-          </button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Bookmark Success State -->
-    <div class="state-container hidden" id="bookmarkSuccessState">
-      <div class="success-content">
-        <div class="success-icon">✓</div>
-        <h2 class="success-title">Bookmark Saved!</h2>
-        <p class="success-message">Your bookmark has been saved to Turbodoc.</p>
-        <div class="success-actions">
-          <button class="btn btn-secondary" id="saveAnotherBookmarkButton">
-            Save Another
-          </button>
-          <a class="btn btn-link" href="https://turbodoc.ai/bookmarks" target="_blank"
-          rel="noopener noreferrer">
-            View All Bookmarks
-        </a>
+      <!-- Error State -->
+      <div class="state-container hidden" id="errorState">
+        <div class="status-content">
+          <div class="status-icon status-icon-error">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 8v5" />
+              <path d="M12 16.5h.01" />
+            </svg>
+          </div>
+          <h2 class="state-title">Something went wrong</h2>
+          <p class="state-subtitle" id="errorMessage">Please try again.</p>
+          <div class="status-actions">
+            <button type="button" class="btn btn-primary" id="retryButton">Try again</button>
+          </div>
         </div>
       </div>
-    </div>
-
-    <!-- Note Success State -->
-    <div class="state-container hidden" id="noteSuccessState">
-      <div class="success-content">
-        <div class="success-icon">✓</div>
-        <h2 class="success-title">Note Saved!</h2>
-        <p class="success-message">Your note has been saved to Turbodoc.</p>
-        <div class="success-actions">
-          <button class="btn btn-secondary" id="saveAnotherNoteButton">
-            Save Another
-          </button>
-          <a class="btn btn-link" href="https://turbodoc.ai/notes" target="_blank"
-          rel="noopener noreferrer">
-            View All Notes
-        </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Error State -->
-    <div class="state-container hidden" id="errorState">
-      <div class="error-content">
-        <div class="error-icon">⚠</div>
-        <h2 class="error-title">Error</h2>
-        <p class="error-message" id="errorMessage">Something went wrong. Please try again.</p>
-        <div class="error-actions">
-          <button class="btn btn-primary" id="retryButton">
-            Try Again
-          </button>
-          <button class="btn btn-secondary" id="backButton">
-            Back
-          </button>
-        </div>
-      </div>
-    </div>
+    </main>
 
     <!-- Footer -->
-    <footer class="popup-footer" id="popupFooter">
-      <div class="footer-links">
-        <button class="link-button" id="addNoteButton">
-          Add Note
-        </button>
-        <button class="link-button" id="addBookmarkButton">
-          Add Bookmark
-        </button>
-        <a class="link-button" id="viewBookmarksButton" href="https://turbodoc.ai/bookmarks" target="_blank"
-          rel="noopener noreferrer">
-          View Bookmarks
-        </a>
-        <a class="link-button" id="viewNotesButton" href="https://turbodoc.ai/notes" target="_blank"
-          rel="noopener noreferrer">
-          View Notes
-        </a>
-        <button class="link-button" id="signOutButton">
-          Sign Out
-        </button>
+    <footer class="popup-footer hidden" id="popupFooter">
+      <div class="account">
+        <span class="user-status" id="userStatus"></span>
+        <span class="dot" aria-hidden="true">·</span>
+        <button type="button" class="text-link muted" id="signOutButton">Sign out</button>
       </div>
+      <a class="text-link" id="openAppLink" href="https://turbodoc.ai/bookmarks" target="_blank"
+        rel="noopener noreferrer">
+        Open Turbodoc
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 17 17 7" />
+          <path d="M8 7h9v9" />
+        </svg>
+      </a>
     </footer>
 
     <!-- Toast Notifications -->
